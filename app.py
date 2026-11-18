@@ -5,6 +5,8 @@ Run:  streamlit run app.py
 from __future__ import annotations
 
 import hashlib
+import hmac
+import os
 import time
 
 import pandas as pd
@@ -20,6 +22,24 @@ from reviewlens.schema import CATEGORIES, CATEGORY_LABELS, NEEDS_REVIEW, SENTIME
 from reviewlens.validate import CSVValidationError, load_reviews
 
 st.set_page_config(page_title="ReviewLens", page_icon="🔎", layout="wide")
+
+
+def _require_password() -> None:
+    """If APP_PASSWORD is set (e.g. on a public server), ask for it before anything runs."""
+    expected = os.getenv("APP_PASSWORD", "")
+    if not expected or st.session_state.get("authed"):
+        return
+    st.title("🔎 ReviewLens")
+    entered = st.text_input("Password", type="password")
+    if entered:
+        if hmac.compare_digest(entered, expected):
+            st.session_state.authed = True
+            st.rerun()
+        st.error("Wrong password.")
+    st.stop()
+
+
+_require_password()
 
 SENTIMENT_COLORS = {"positive": "#2E9E5B", "neutral": "#9AA0A6", "negative": "#D64545", NEEDS_REVIEW: "#E0A800"}
 URGENCY_COLORS = {"high": "#D64545", "medium": "#E8912D", "low": "#4C8BF5", NEEDS_REVIEW: "#E0A800"}

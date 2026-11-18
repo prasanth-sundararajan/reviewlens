@@ -1,0 +1,14 @@
+# Builds straight from the GitHub repo, so Hostinger Docker Manager (or `docker compose up -d`) can deploy it.
+# Secrets (OPENAI_API_KEY, APP_PASSWORD) come from the project environment, never from this file.
+services:
+  reviewlens:
+    build: https://github.com/prasanth-sundararajan/reviewlens.git#main
+    image: reviewlens:latest
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    environment:
+      - LLM_PROVIDER=${LLM_PROVIDER:-openai}
+      - LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - APP_PASSWORD=${APP_PASSWORD:-}
