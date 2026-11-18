@@ -113,6 +113,15 @@ pytest -q
 ```
 Runs offline (no API key): validation, 200+ row pipeline, retry → `needs_review`, report numbers == table, percentages sum to 100, Excel export round-trip with Tamil text, trend table.
 
+## Verified run (OpenAI `gpt-4o-mini`, `data/reviews_week40.csv`)
+
+- 248 reviews classified in ~52 s at `max_concurrency=8`; 248/248 valid on the first attempt, 0 `needs_review`
+- Languages detected: English 173, Tanglish 52, Tamil 23 — all with correct English summaries, e.g.
+  - *"Order late ah vandhuchu, 9:30 ku dhaan vandhuchu. Food suda illa."* → "The order was delivered late at 9:30 PM and the food was cold."
+  - *"பில்லில் கூடுதல் கட்டணம் போட்டாங்க, சொல்லவே இல்லை."* → "They added an extra charge to the bill without informing me."
+- HIGH urgency: food poisoning / spoiled food, hair, wrong or missing orders, refund demands, money debited without an order, rude staff
+- Weekly report generated in ~6 s; all counts match the enriched table
+
 ## Done checklist
 
 - [x] Processes a 200+ row CSV without crashing or timing out (batched, concurrent, per-review error isolation)

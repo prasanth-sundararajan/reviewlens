@@ -47,7 +47,7 @@ class ReviewAnalysis(BaseModel):
     urgency: Urgency = Field(
         description=(
             "high = needs a reply today: health/hygiene/food poisoning, wrong or missing order, "
-            "refund or overcharge demand, abusive or rude staff, safety; medium = clear complaint "
+            "refund or overcharge demand, rude/abusive staff, manager or rider (always high), safety; medium = clear complaint "
             "without those risks; low = praise, neutral remarks or minor suggestions."
         )
     )

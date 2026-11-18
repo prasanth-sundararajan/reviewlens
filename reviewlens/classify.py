@@ -20,9 +20,12 @@ Understand the meaning in any of these languages.
 Rules:
 - category must be exactly one of: food_quality, delivery, price, staff, packaging, app.
   Pick the MAIN problem (or main praise) of the review.
-- urgency = high when the review mentions food poisoning, illness, hygiene (hair, insects,
-  stale food), wrong or missing order, refund or overcharge demands, rude/abusive staff or
-  safety. medium = a clear complaint without those risks. low = praise, neutral or minor.
+- urgency = high when the review mentions ANY of: food poisoning, illness, hygiene (hair,
+  insects, stale food), wrong or missing order, refund or overcharge demands, money debited
+  without an order, safety, or rude / abusive / shouting / ignoring behaviour by ANY staff
+  member, manager or delivery rider (rude staff is ALWAYS high, even without other issues).
+  medium = a clear complaint without those risks (e.g. late or cold delivery, spills, price).
+  low = praise, neutral or minor suggestions.
 - summary: ONE short English sentence, even when the review is Tamil or Tanglish. Keep facts
   such as times, amounts and dish names.
 - suggested_reply: polite, warm, 2-3 sentences, apologise for complaints, thank for praise,
