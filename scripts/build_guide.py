@@ -82,7 +82,8 @@ def code(text: str):
     t.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), CODE_BG), ("BOX", (0, 0), (-1, -1), 0.5, RULE),
                            ("LEFTPADDING", (0, 0), (-1, -1), 7), ("RIGHTPADDING", (0, 0), (-1, -1), 7),
                            ("TOPPADDING", (0, 0), (-1, -1), 6), ("BOTTOMPADDING", (0, 0), (-1, -1), 6)]))
-    return KeepTogether([t, Spacer(1, 6)])
+    t.spaceAfter = 6  # a one-cell table never splits, so no KeepTogether needed (nesting it breaks pages)
+    return t
 
 
 def table(rows, widths):
@@ -513,7 +514,97 @@ ssh -i $HOME\.ssh\reviewlens_vps root@<VPS-IP> "cd /opt/reviewlens && git pull &
                 [62, 108]),
           PageBreak()]
 
-    s += [h1("18. Done checklist"),
+    s += [h1("18. All terminal commands (copy-paste, no hPanel clicks)"),
+          p("Every step as commands. Laptop = <b>PowerShell</b>, server = the <b>SSH session</b>. Replace "
+            "yourdomain.com, &lt;VPS-ID&gt; and &lt;VPS-IP&gt;. The Hostinger API token is created in "
+            "<b>hPanel -> Account -> API</b>."),
+          h2("Fastest: two scripts in the repo"),
+          code(r"""
+# Laptop - does snapshot, SSH key, DNS and the server install in one go:
+$env:HOSTINGER_API_TOKEN = "<your token>"
+.\scripts\hostinger_setup.ps1 -Domain yourdomain.com -DryRun     # preview, changes nothing
+.\scripts\hostinger_setup.ps1 -Domain yourdomain.com
+
+# Already on the VPS - install or update (asks for the OpenAI key, hidden):
+U=https://raw.githubusercontent.com/<you>/reviewlens/main/scripts
+curl -fsSLo server_setup.sh $U/server_setup.sh
+sudo APP_DOMAIN=www.yourdomain.com bash server_setup.sh
+"""),
+          h2("A-D. Laptop: VPS, snapshot, SSH key and DNS through the Hostinger API"),
+          code(r"""
+$H = @{ Authorization = "Bearer $env:HOSTINGER_API_TOKEN"; Accept = "application/json" }
+$api = "https://developers.hostinger.com"; $J = "application/json"
+Invoke-RestMethod "$api/api/vps/v1/virtual-machines" -Headers $H |
+  Select-Object id, hostname, state, @{n="ip";e={$_.ipv4[0].address}}
+$VM = <VPS-ID>; $IP = "<VPS-IP>"; $DOMAIN = "yourdomain.com"
+
+# B. snapshot first (replaces an older one)
+Invoke-RestMethod -Method Post "$api/api/vps/v1/virtual-machines/$VM/snapshot" -Headers $H
+
+# C. SSH key: create (Enter twice), add to the VPS, test
+ssh-keygen -t ed25519 -f $HOME\.ssh\reviewlens_vps
+$pub = (Get-Content $HOME\.ssh\reviewlens_vps.pub -Raw).Trim()
+Invoke-RestMethod -Method Post "$api/api/vps/v1/virtual-machines/$VM/ssh-keys" -Headers $H `
+  -ContentType $J -Body (@{ keys = @($pub) } | ConvertTo-Json)
+ssh -i $HOME\.ssh\reviewlens_vps root@$IP "hostname"
+
+# D. DNS: remove a www CNAME (if any), add A www -> VPS, check
+Invoke-RestMethod -Method Delete "$api/api/dns/v1/zones/$DOMAIN" -Headers $H -ContentType $J `
+  -Body (@{ filters = @(@{ name = "www"; type = "CNAME" }) } | ConvertTo-Json -Depth 5)
+Invoke-RestMethod -Method Put "$api/api/dns/v1/zones/$DOMAIN" -Headers $H -ContentType $J `
+  -Body (@{ overwrite = $true; zone = @(@{ name = "www"; type = "A"; ttl = 300;
+           records = @(@{ content = $IP }) }) } | ConvertTo-Json -Depth 6)
+Resolve-DnsName "www.$DOMAIN" -Type A -Server 8.8.8.8 -DnsOnly
+"""),
+          KeepTogether([h2("E. Server: install by hand (instead of server_setup.sh)"), code(r"""
+apt-get update && apt-get install -y docker.io docker-compose-v2 git
+systemctl enable --now docker
+git clone https://github.com/<you>/reviewlens.git /opt/reviewlens && cd /opt/reviewlens
+read -rsp "OpenAI API key: " KEY; echo
+umask 077; cat > .env <<EOF
+LLM_PROVIDER=openai
+OPENAI_API_KEY=$KEY
+MAX_REVIEWS=500
+APP_DOMAIN=www.yourdomain.com
+APP_PATH=techstack
+APP_URL=https://www.yourdomain.com/techstack/
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASSWORD=
+REPORT_RECIPIENTS=
+EOF
+unset KEY; chmod 600 .env
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+""")]),
+          KeepTogether([h2("F. Laptop: check it is live"), code(r"""
+$d = "www.yourdomain.com"
+curl.exe -s -o NUL -w "health %{http_code}`n" "https://$d/techstack/_stcore/health"     # 200
+curl.exe -s -o NUL -w "http %{http_code} -> %{redirect_url}`n" "http://$d/techstack/"  # 308
+curl.exe -s -o NUL -w "root %{http_code} -> %{redirect_url}`n" "https://$d/"           # 302
+$t = New-Object Net.Sockets.TcpClient($d, 443)
+$s = New-Object Net.Security.SslStream($t.GetStream()); $s.AuthenticateAsClient($d)
+"certificate until " + $s.RemoteCertificate.GetExpirationDateString(); $t.Close()
+""")]),
+          KeepTogether([h2("G-H. Server day-to-day, and roll back from the laptop"), code(r"""
+cd /opt/reviewlens; alias rl='docker compose -f docker-compose.yml -f docker-compose.prod.yml'
+rl ps                                                  # caddy, reviewlens, scheduler = Up
+rl logs -f reviewlens                                  # app log
+rl exec scheduler python -m reviewlens.emailer --test  # [TEST] email
+sudo bash scripts/server_setup.sh                      # update to the latest GitHub version
+nano .env && rl up -d --force-recreate                 # change settings
+rl down                                                # stop
+
+# laptop: restore the snapshot from step B (whole VPS goes back to that moment)
+Invoke-RestMethod -Method Post "$api/api/vps/v1/virtual-machines/$VM/snapshot/restore" `
+  -Headers $H
+""")]),
+          note("hostinger_setup.ps1 and the API commands use the official Hostinger API "
+               "(developers.hostinger.com). Tested: dry run, real API reachability (401 with a fake token) and "
+               "server_setup.sh on a fresh Ubuntu 24.04 plus the live server."),
+          PageBreak()]
+
+    s += [h1("19. Done checklist"),
           table([["Requirement", "How it is met", "Status"],
                  ["Processes a 200+ row CSV without crashing", "Batched, concurrent, per-review error isolation (248 rows in about 1 minute)", "Done"],
                  ["All 6 fields, only allowed values", "Pydantic Literal enums + re-validation + retry", "Done"],
@@ -526,14 +617,14 @@ ssh -i $HOME\.ssh\reviewlens_vps root@<VPS-IP> "cd /opt/reviewlens && git pull &
                  ["Stretch: Monday email", "scheduler container + Gmail SMTP", "Done"]],
                 [55, 95, 20]),
 
-          h1("19. Weekly routine for the manager"),
+          h1("20. Weekly routine for the manager"),
           *bullets(["Export the week's reviews to a CSV (review_id, date, platform, rating, review_text).",
                     "Open the app, upload, click <b>Analyse</b>; read the dashboard and filter <b>HIGH urgency only</b>.",
                     "Reply to urgent reviews using the suggested replies; download the enriched CSV for the support team.",
                     "Click <b>Save as this week's official report</b> - next week shows trend arrows, and the report "
                     "is emailed on Monday at 09:00."]),
 
-          h1("20. Troubleshooting"),
+          h1("21. Troubleshooting"),
           table([["Problem", "Fix"],
                  ["'OPENAI_API_KEY is not set'", "Add the key to .env (locally) or the server's .env, then restart."],
                  ["Analysis failed / rate limit", "Lower 'Parallel requests' in the sidebar; check your OpenAI budget."],
@@ -548,7 +639,7 @@ ssh -i $HOME\.ssh\reviewlens_vps root@<VPS-IP> "cd /opt/reviewlens && git pull &
           note("Security: keep the OpenAI key and Gmail App Password only in .env files (chmod 600 on the server). "
                "Use a separate Gmail account for sending and set a monthly OpenAI budget - a public app spends on your key."),
           PageBreak(),
-          h1("21. Usage outputs (screenshots)"),
+          h1("22. Usage outputs (screenshots)"),
           p("Real output from the finished app (OpenAI gpt-4o-mini, sample week 40 compared with saved week 39). "
             "The same images are in <b>docs/screenshots/</b> in the repository."),
           ]

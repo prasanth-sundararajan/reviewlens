@@ -114,6 +114,18 @@ pytest -q                              # 15 offline tests, no API key needed
 
 This is how the live app at `https://www.kowsalyagroups.com/techstack/` is deployed. Hostinger **shared/web hosting cannot run Python apps** — use a **Hostinger VPS** (KVM plan, e.g. KVM 2) with Ubuntu.
 
+> **Fastest: one command from your Windows laptop.** With a Hostinger API token (hPanel → Account → API), this takes a snapshot, adds your SSH key, points DNS at the VPS and installs everything — no hPanel clicks:
+>
+> ```powershell
+> $env:HOSTINGER_API_TOKEN = "<your token>"
+> .\scripts\hostinger_setup.ps1 -Domain yourdomain.com          # app at https://www.yourdomain.com/techstack/
+> .\scripts\hostinger_setup.ps1 -Domain yourdomain.com -DryRun  # preview first, changes nothing
+> ```
+>
+> Already on the VPS? `curl -fsSLo server_setup.sh https://raw.githubusercontent.com/prasanth-sundararajan/reviewlens/main/scripts/server_setup.sh && sudo bash server_setup.sh` does steps 4–6 below in one go. Every command is also listed in [All terminal commands](#all-terminal-commands-copy-paste).
+>
+> The manual steps:
+
 **1. Get the VPS ready (hPanel)**
 - In **hPanel → VPS**, choose your server with an **Ubuntu** template (plain Ubuntu 24.04+ works; you install Docker yourself in step 4). Note its **IP address**.
 - *Recommended:* create a **snapshot** first (VPS → Snapshots & backups) so you can roll back.
@@ -195,6 +207,107 @@ The app and scheduler restart automatically after crashes and server reboots (`r
 | Site shows Hostinger "Parked domain" page | `www` still a CNAME to the parked root — replace it with an A record |
 | `Permission denied (publickey)` | Add the `.pub` key in hPanel → VPS → SSH keys; use `ssh -i <key>` |
 | Email `535 Username and Password not accepted` | `SMTP_USER` must be the Gmail account that created the App Password |
+
+## All terminal commands (copy-paste)
+
+Everything above as commands only — no hPanel clicks. Replace `yourdomain.com`, `<VPS-ID>` and `<VPS-IP>`. Laptop commands are **PowerShell**; server commands run in the **SSH session**.
+
+**A. Laptop: Hostinger API token and your VPS** (token: hPanel → Account → API)
+
+```powershell
+$env:HOSTINGER_API_TOKEN = "<your token>"
+$H = @{ Authorization = "Bearer $env:HOSTINGER_API_TOKEN"; Accept = "application/json" }
+$api = "https://developers.hostinger.com"
+Invoke-RestMethod "$api/api/vps/v1/virtual-machines" -Headers $H | Select-Object id, hostname, state, @{n="ip";e={$_.ipv4[0].address}}
+$VM = <VPS-ID>; $IP = "<VPS-IP>"; $DOMAIN = "yourdomain.com"
+```
+
+**B. Laptop: snapshot (backup) first** — replaces an older snapshot
+
+```powershell
+Invoke-RestMethod -Method Post "$api/api/vps/v1/virtual-machines/$VM/snapshot" -Headers $H
+Invoke-RestMethod "$api/api/vps/v1/virtual-machines/$VM/snapshot" -Headers $H        # check it
+```
+
+**C. Laptop: SSH key — create, add to the VPS, test**
+
+```powershell
+ssh-keygen -t ed25519 -f $HOME\.ssh\reviewlens_vps        # press Enter twice (no passphrase)
+$pub = (Get-Content $HOME\.ssh\reviewlens_vps.pub -Raw).Trim()
+Invoke-RestMethod -Method Post "$api/api/vps/v1/virtual-machines/$VM/ssh-keys" -Headers $H -ContentType "application/json" -Body (@{ keys = @($pub) } | ConvertTo-Json)
+ssh -i $HOME\.ssh\reviewlens_vps root@$IP "hostname; uptime"
+```
+
+**D. Laptop: DNS — `www` → VPS** (removes a `www` CNAME first, if there is one)
+
+```powershell
+Invoke-RestMethod "$api/api/dns/v1/zones/$DOMAIN" -Headers $H | Format-Table name, type, @{n="value";e={$_.records.content}}
+Invoke-RestMethod -Method Delete "$api/api/dns/v1/zones/$DOMAIN" -Headers $H -ContentType "application/json" -Body (@{ filters = @(@{ name = "www"; type = "CNAME" }) } | ConvertTo-Json -Depth 5)
+Invoke-RestMethod -Method Put "$api/api/dns/v1/zones/$DOMAIN" -Headers $H -ContentType "application/json" -Body (@{ overwrite = $true; zone = @(@{ name = "www"; type = "A"; ttl = 300; records = @(@{ content = $IP }) }) } | ConvertTo-Json -Depth 6)
+Resolve-DnsName "www.$DOMAIN" -Type A -Server 8.8.8.8 -DnsOnly            # must show the VPS IP
+```
+
+**E. Server: install and start** — `ssh -i $HOME\.ssh\reviewlens_vps root@<VPS-IP>`, then either the script (asks for the OpenAI key, hidden):
+
+```bash
+curl -fsSLo server_setup.sh https://raw.githubusercontent.com/prasanth-sundararajan/reviewlens/main/scripts/server_setup.sh
+sudo APP_DOMAIN=www.yourdomain.com bash server_setup.sh
+```
+
+…or by hand:
+
+```bash
+apt-get update && apt-get install -y docker.io docker-compose-v2 git
+systemctl enable --now docker
+git clone https://github.com/prasanth-sundararajan/reviewlens.git /opt/reviewlens && cd /opt/reviewlens
+read -rsp "OpenAI API key: " KEY; echo
+umask 077; cat > .env <<EOF
+LLM_PROVIDER=openai
+LLM_MODEL=gpt-4o-mini
+OPENAI_API_KEY=$KEY
+MAX_REVIEWS=500
+APP_DOMAIN=www.yourdomain.com
+APP_PATH=techstack
+APP_PASSWORD=
+APP_URL=https://www.yourdomain.com/techstack/
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASSWORD=
+REPORT_RECIPIENTS=
+EOF
+unset KEY; chmod 600 .env
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+```
+
+**F. Check it is live** (laptop, PowerShell)
+
+```powershell
+$d = "www.yourdomain.com"
+curl.exe -s -o NUL -w "health %{http_code}`n" "https://$d/techstack/_stcore/health"              # 200
+curl.exe -s -o NUL -w "http   %{http_code} -> %{redirect_url}`n" "http://$d/techstack/"           # 308 -> https
+curl.exe -s -o NUL -w "root   %{http_code} -> %{redirect_url}`n" "https://$d/"                    # 302 -> /techstack/
+$t = New-Object Net.Sockets.TcpClient($d, 443); $s = New-Object Net.Security.SslStream($t.GetStream()); $s.AuthenticateAsClient($d); "certificate until " + $s.RemoteCertificate.GetExpirationDateString(); $t.Close()
+```
+
+**G. Server: day-to-day** (in `/opt/reviewlens`)
+
+```bash
+alias rl='docker compose -f docker-compose.yml -f docker-compose.prod.yml'
+rl ps                                             # caddy, reviewlens, scheduler = Up
+rl logs -f reviewlens                             # app log
+rl logs scheduler | tail -3                       # next Monday email time
+rl exec scheduler python -m reviewlens.emailer --test     # send a [TEST] email
+sudo bash scripts/server_setup.sh                 # update to the latest GitHub version
+nano .env && rl up -d --force-recreate            # change settings
+rl down                                           # stop everything
+```
+
+**H. Laptop: roll back** (restores the snapshot from step B — the whole VPS goes back to that moment)
+
+```powershell
+Invoke-RestMethod -Method Post "$api/api/vps/v1/virtual-machines/$VM/snapshot/restore" -Headers $H
+```
 
 The full walkthrough — project setup, every module, tests, Docker, GitHub, Hostinger, DNS, HTTPS and Gmail — is in the **[build guide PDF](docs/ReviewLens_Build_Guide.pdf)**.
 
