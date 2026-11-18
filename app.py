@@ -20,7 +20,7 @@ from reviewlens.export import to_excel_csv
 from reviewlens.history import list_weeks, previous_week, save_week
 from reviewlens.llm import get_model_name, get_provider, is_mock
 from reviewlens.report import generate_insights, render_report
-from reviewlens import theme
+from reviewlens import run_limit, theme
 from reviewlens.schema import CATEGORIES, CATEGORY_LABELS, NEEDS_REVIEW, SENTIMENTS, URGENCIES
 from reviewlens.validate import CSVValidationError, load_reviews, max_reviews
 
@@ -66,6 +66,16 @@ with st.sidebar:
     st.divider()
     prev_file = st.file_uploader("Optional: last week's enriched CSV (for trends)", type="csv", key="prev",
                                  help="Not needed if last week was saved as an official report - it is used automatically.")
+    if not is_mock(provider):
+        lim = run_limit.status()
+        st.divider()
+        st.subheader("Daily analyses")
+        if lim["limit"]:
+            st.progress(min(lim["used"] / lim["limit"], 1.0))
+            st.write(f"**{lim['used']}** of **{lim['limit']}** analyses used today")
+            st.caption(f"{lim['runs_left']} left today. Resets at midnight (India time).")
+        else:
+            st.caption(f"No daily limit (MAX_RUNS_PER_DAY=0). {lim['used']} analyses today.")
 
 theme.hero()
 
@@ -98,8 +108,18 @@ if st.session_state.get("file_key") != file_key:
     st.session_state.pop("report", None)
 
 if "enriched" not in st.session_state:
-    if not st.button(f"Analyse {len(reviews)} reviews", type="primary"):
+    limit_hit = not is_mock(provider) and not run_limit.status()["can_start"]
+    if limit_hit:
+        st.warning(f"**Daily limit reached.** All {run_limit.limit_per_day()} analyses for today have been used. "
+                   "New analyses open again at midnight (India time).")
+    if not st.button(f"Analyse {len(reviews)} reviews", type="primary", disabled=limit_hit):
         st.stop()
+    if not is_mock(provider):
+        try:
+            run_limit.start_run(len(reviews))
+        except run_limit.RunLimitReached as exc:
+            st.warning(str(exc))
+            st.stop()
     bar = st.progress(0.0, text="Classifying reviews…")
     started = time.time()
     try:

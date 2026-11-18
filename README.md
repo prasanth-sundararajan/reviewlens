@@ -172,6 +172,7 @@ chmod 600 .env             # only root can read the secrets
 | `APP_DOMAIN` | `www.yourdomain.com` | Must match the DNS A record |
 | `APP_PATH` | `techstack/ReviewLens` | App is served at `https://www.yourdomain.com/techstack/ReviewLens/` |
 | `MAX_REVIEWS` | `500` | Cost guard per upload |
+| `MAX_RUNS_PER_DAY` | `3` | Analyses allowed per day (every started analysis counts; resets at midnight IST; `0` = no limit; mock mode is not counted) |
 | `APP_PASSWORD` | *(empty)* | Set a value to require a login; leave empty for public access |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `REPORT_RECIPIENTS` | `smtp.gmail.com`, `587`, … | Optional — Monday email (see below) |
 | `APP_URL` | `https://www.yourdomain.com/techstack/ReviewLens/` | Link inside the email |
@@ -266,6 +267,7 @@ LLM_PROVIDER=openai
 LLM_MODEL=gpt-4o-mini
 OPENAI_API_KEY=$KEY
 MAX_REVIEWS=500
+MAX_RUNS_PER_DAY=3
 APP_DOMAIN=www.yourdomain.com
 APP_PATH=techstack/ReviewLens
 APP_PASSWORD=
@@ -365,5 +367,5 @@ Covers CSV validation and the 500 limit, a 200+ row run, retry → `needs_review
 ## Security notes
 
 - Secrets (`OPENAI_API_KEY`, `SMTP_PASSWORD`) live only in `.env` — git-ignored locally, `chmod 600` on the server.
-- The public app spends on your OpenAI key: keep the per-upload limit (`MAX_REVIEWS`) and set a monthly budget in your OpenAI account.
+- The public app spends on your OpenAI key: it allows `MAX_RUNS_PER_DAY` (3) analyses per day and `MAX_REVIEWS` (500) reviews per upload; also set a monthly budget in your OpenAI account.
 - Use a dedicated Gmail account and an App Password for sending; it can be revoked any time.
