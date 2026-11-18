@@ -1,0 +1,28 @@
+# Production override: HTTPS via Caddy, app port not exposed publicly.
+# Usage on the server (APP_DOMAIN set in .env):
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+services:
+  reviewlens:
+    ports: !reset []
+    expose:
+      - "8501"
+
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    depends_on:
+      - reviewlens
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      - APP_DOMAIN=${APP_DOMAIN:?set APP_DOMAIN in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:

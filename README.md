@@ -49,6 +49,19 @@ pip install langchain-anthropic        # then LLM_PROVIDER=anthropic + ANTHROPIC
 ```
 Optionally set `LLM_MODEL` to pick a specific model.
 
+## Docker
+
+```bash
+docker compose up -d --build          # local: http://localhost:8501
+```
+
+Production with HTTPS (Caddy + Let's Encrypt). Point a DNS A record at the server, then in `.env` set
+`OPENAI_API_KEY`, `APP_PASSWORD` (login gate) and `APP_DOMAIN` (e.g. `techstack.example.com`):
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+```
+
 ## How it works
 
 ```

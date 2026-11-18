@@ -1,0 +1,5 @@
+# HTTPS reverse proxy for production. Caddy fetches and renews the Let's Encrypt certificate itself.
+{$APP_DOMAIN} {
+	encode gzip
+	reverse_proxy reviewlens:8501
+}
