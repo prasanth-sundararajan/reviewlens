@@ -213,7 +213,7 @@ with tab_reviews:
                            file_name="reviews_filtered.csv", mime="text/csv")
 
 with tab_report:
-    st.code(st.session_state.report, language=None)
+    st.code(st.session_state.report, language=None, wrap_lines=True)
     c1, c2 = st.columns(2)
     c1.download_button("⬇️ Download report (.txt)", st.session_state.report.encode("utf-8"),
                        file_name=f"weekly_report_{stats.date_to or 'week'}.txt")

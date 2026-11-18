@@ -102,7 +102,7 @@ def build_message(week: SavedWeek | None, settings: SMTPSettings, app_url: str =
     msg.set_content(report + "\n\nThe full enriched table is attached (opens in Excel)." + link)
     msg.add_alternative(
         "<p>Weekly customer feedback report from ReviewLens.</p>"
-        f"<pre style=\"font-family:Consolas,Menlo,monospace;font-size:13px\">{html.escape(report)}</pre>"
+        f"<pre style=\"font-family:Consolas,Menlo,monospace;font-size:13px;white-space:pre-wrap\">{html.escape(report)}</pre>"
         "<p>The full enriched table is attached (opens in Excel).</p>"
         + (f'<p><a href="{html.escape(app_url)}">Open ReviewLens</a></p>' if app_url else ""),
         subtype="html",

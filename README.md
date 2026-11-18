@@ -1,154 +1,155 @@
 # 🔎 ReviewLens: Customer Feedback Analyzer
 
-> Track 1 Gen AI | LangChain — Use case 01 (Intermediate)
+> **Track 1 Gen AI | LangChain — Use case 01 (Intermediate).** Turn hundreds of raw customer reviews into tagged, prioritised insights and a weekly report a manager can act on in five minutes.
 
-Turn hundreds of raw customer reviews (English, Tamil and Tanglish) from Google, Zomato, Swiggy and Amazon into **tagged, prioritised insights** and a **weekly report a manager can act on in five minutes**.
+🌐 **Live app:** https://www.kowsalyagroups.com/techstack/
+📘 **Step-by-step build & deploy guide (PDF):** [docs/ReviewLens_Build_Guide.pdf](docs/ReviewLens_Build_Guide.pdf)
+📥 **Sample data:** [reviews_week40.csv](https://github.com/prasanth-sundararajan/reviewlens/releases/download/v1.0/reviews_week40.csv)
 
-## Features
+![Dashboard](docs/screenshots/03_dashboard.png)
 
-| Requirement | How it is done |
+---
+
+## What problem does it solve?
+
+A restaurant chain or online store gets **200–500 reviews every week** from Google, Zomato, Swiggy and Amazon — in **English, Tamil and Tanglish**. Today a manager reads them by hand:
+
+- urgent complaints (food poisoning, wrong order, rude staff) are missed for days;
+- nobody can say *with numbers* what customers complain about most.
+
+## What does ReviewLens do?
+
+You upload the week's reviews as a CSV. ReviewLens:
+
+1. **Reads every review with an LLM** and tags it with a fixed structure:
+
+   | Field | Values | Why it matters |
+   |---|---|---|
+   | `sentiment` | positive · neutral · negative | Customer mood at a glance |
+   | `category` | food_quality · delivery · price · staff · packaging · app | Which department must fix it |
+   | `urgency` | low · medium · **high** | High = reply today (health, refund, rude staff, wrong order) |
+   | `language` | English · Tamil · Tanglish · Other | Mixed-language reviews are understood |
+   | `summary` | one English sentence | Read 248 lines instead of 248 paragraphs |
+   | `suggested_reply` | polite, ready-to-post | Support team reviews and posts it |
+
+2. **Counts everything with pandas** — sentiment split, categories, urgency, platforms. Numbers are never guessed by the LLM, so the report always matches the table.
+3. **Writes a weekly report** with a second chain: top complaints, top praise, the urgent count and **3 action items**.
+4. **Shows a dashboard** with charts and a **HIGH-urgency filter**, and exports an **Excel-ready CSV** for the support team.
+5. **Compares with last week** (trend arrows ▲▼), can **reply in the review's own language**, and **emails the report every Monday** automatically.
+
+## Screens
+
+| | |
 |---|---|
-| Upload a CSV (`review_id, date, platform, rating, review_text`) | Streamlit uploader + `reviewlens/validate.py` (checks columns, drops empty/duplicate rows, cleans ratings/dates) |
-| Fixed structure per review: sentiment, category, urgency, language, summary, suggested reply | LCEL chain `ChatPromptTemplate \| llm.with_structured_output(ReviewAnalysis)` with a Pydantic model whose fields are `Literal` enums |
-| Invalid LLM value → automatic retry → `needs_review` | `analyse_reviews()` re-validates every output, retries failed reviews (default 2 retries), then marks them `needs_review` instead of crashing |
-| Hundreds of reviews fast and within rate limits | `chain.batch(..., config={"max_concurrency": n})` in chunks of 25 with a progress bar |
-| Tamil & Tanglish understood, summarised in English | Prompt rules + Tanglish glossary; `language` field detected per review |
-| Weekly insights report (map → reduce) | Per-review summaries (map) → grouped by category, condensed in chunks if large → one report chain writes headlines, praise and **exactly 3 action items** |
-| Report numbers are exact | All counts/percentages come from pandas (`aggregate.py`); the LLM only writes words. Percentages use largest-remainder rounding so they sum to 100 |
-| Dashboard | Sentiment donut, category × sentiment bar, urgency bar, platform bar, language counts, KPI tiles |
-| HIGH urgency filter | Toggle in the *Reviews* tab (+ sentiment / category / platform filters) |
-| Excel-ready export | UTF-8 **with BOM** CSV so Tamil text and ₹ show correctly in Excel |
-| API key from `.env`, never hard-coded | `python-dotenv`; provider SDKs read the key from the environment |
-| Swap models without changing the chain | `LLM_PROVIDER=openai \| gemini \| anthropic \| mock` in `.env` |
+| **Upload & validation** — empty/duplicate rows dropped before any LLM call<br>![Upload](docs/screenshots/02_upload_validation.png) | **HIGH urgency filter** — the 25 reviews that need a reply today<br>![High urgency](docs/screenshots/04_high_urgency_reviews.png) |
+| **Weekly report** — top complaints, praise, action items, *VS LAST WEEK*<br>![Report](docs/screenshots/05_weekly_report.png) | **Trend vs last week** — automatic, from the last saved week<br>![Trend](docs/screenshots/06_trend_vs_last_week.png) |
+| **Replies in the review's language** — Tamil → Tamil, Tanglish → Tanglish<br>![Same language](docs/screenshots/07_same_language_replies.png) | **Monday email** — saved report + enriched CSV attached<br>![Email](docs/screenshots/09_weekly_email.png) |
 
-**Stretch goals (all done):**
-- **Week-over-week trend arrows** - click *Save as this week's official report*; next week's upload compares automatically (▲ ▼ ▶ in the Trend tab and a *VS LAST WEEK* section in the report). You can also upload last week's enriched CSV.
-- **Replies in the same language as the review** - sidebar toggle; Tamil → Tamil script, Tanglish → Tanglish, English → English (summaries stay in English).
-- **Weekly report emailed every Monday** - a `scheduler` container emails the latest saved report (CSV attached) every Monday 09:00 IST via SMTP; sends a reminder if nothing was saved. Configure `SMTP_*` and `REPORT_RECIPIENTS` in `.env`; test with `python -m reviewlens.emailer --dry-run`.
+More: [start page](docs/screenshots/01_start_page.png) · [500-review limit message](docs/screenshots/08_review_limit.png). All screenshots are real output (OpenAI `gpt-4o-mini`, sample week 40 vs saved week 39).
 
-**Cost guard:** at most `MAX_REVIEWS` (default 500) reviews per upload.
+## How it works
+
+```
+01 Upload CSV → 02 Validate → 03 Classify (LLM, batched) → 04 Aggregate (pandas)
+             → 05 Weekly report (map → reduce) → 06 Dashboard + CSV export
+             → (save week) → trend arrows next week + Monday email
+```
+
+- **Structured output:** `ChatPromptTemplate | llm.with_structured_output(ReviewAnalysis)` — a Pydantic model whose fields are `Literal` enums, so invalid values are rejected.
+- **Retry → `needs_review`:** invalid outputs are re-validated and retried twice; anything still failing is flagged instead of crashing the run.
+- **Batching:** `chain.batch(..., max_concurrency=8)` — 248 reviews in about one minute.
+- **Map → reduce report:** per-review summaries are grouped by category (condensed in chunks if large), then one chain writes the insights.
+- **Swap models without changing chains:** `LLM_PROVIDER=openai | gemini | anthropic | mock` in `.env`.
+
+| Tech | Used for |
+|---|---|
+| LangChain (LCEL), Pydantic | Prompt pipelines and typed LLM output |
+| OpenAI `gpt-4o-mini` (Gemini / Claude supported) | The LLM |
+| Streamlit, pandas, Plotly | Web app, numbers, charts |
+| Docker, Caddy | Packaging; HTTPS with automatic Let's Encrypt certificates |
+| SMTP (Gmail App Password) | Monday report email |
+| pytest | 15 offline tests |
 
 ## Quick start
 
 ```bash
 git clone https://github.com/prasanth-sundararajan/reviewlens.git
 cd reviewlens
-python -m venv .venv && .venv\Scripts\activate      # Windows  (source .venv/bin/activate on macOS/Linux)
+python -m venv .venv && .venv\Scripts\activate      # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-copy .env.example .env                              # cp on macOS/Linux, then add your API key
-streamlit run app.py
+copy .env.example .env                              # macOS/Linux: cp; then add OPENAI_API_KEY
+streamlit run app.py                                # http://localhost:8501
 ```
 
-Upload `data/reviews_week40.csv` (248 reviews + a few dirty rows) and press **Analyse**.
+Upload `data/reviews_week40.csv` and click **Analyse**. No API key yet? Set `LLM_PROVIDER=mock` in `.env` to try the whole app offline.
 
-📥 **Sample data:** [download reviews_week40.csv](https://github.com/prasanth-sundararajan/reviewlens/releases/download/v1.0/reviews_week40.csv) (also in [`data/`](data/reviews_week40.csv) and on the [v1.0 release](https://github.com/prasanth-sundararajan/reviewlens/releases/tag/v1.0); the live app has a download button too).
-
-No API key yet? Set `LLM_PROVIDER=mock` in `.env` to try the full app offline (keyword-based results, same pipeline).
-
-### Using Gemini or Claude instead of OpenAI
+### Docker
 
 ```bash
-pip install langchain-google-genai     # then LLM_PROVIDER=gemini   + GOOGLE_API_KEY
-pip install langchain-anthropic        # then LLM_PROVIDER=anthropic + ANTHROPIC_API_KEY
-```
-Optionally set `LLM_MODEL` to pick a specific model.
-
-## Docker
-
-```bash
-docker compose up -d --build          # local: http://localhost:8501
+docker compose up -d --build          # app + Monday-email scheduler, http://localhost:8501
 ```
 
-Production with HTTPS (Caddy + Let's Encrypt). Point a DNS A record at the server, then in `.env` set
-`OPENAI_API_KEY`, `APP_PASSWORD` (login gate) and `APP_DOMAIN` (e.g. `www.example.com`; comma-separated for several) and optionally `APP_PATH` (default `techstack`, so the app is at `https://www.example.com/techstack/`):
+Production with HTTPS (Caddy + Let's Encrypt): point a DNS A record at the server, set `OPENAI_API_KEY`, `APP_DOMAIN` (e.g. `www.example.com`) and optionally `APP_PATH` (default `techstack`) in `.env`, then:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
-## How it works
+The full walkthrough — project setup, every module, tests, Docker, GitHub, VPS deploy, DNS, HTTPS and Gmail — is in the **[build guide PDF](docs/ReviewLens_Build_Guide.pdf)**.
+
+### Weekly email (optional)
+
+Add to `.env`: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` (a Google **App Password** for the *same* Gmail account), `REPORT_RECIPIENTS`. Then:
+
+```bash
+python -m reviewlens.emailer --dry-run   # what would be sent
+python -m reviewlens.emailer --test      # send a [TEST] email now
+```
+
+In the app, click **Save as this week's official report** each week — it is emailed every Monday 09:00 IST and used for next week's trend arrows.
+
+## Project structure
 
 ```
-01 Upload CSV → 02 Validate → 03 Classify (chain.batch, retries) → 04 Aggregate (pandas)
-             → 05 Report (map-reduce chain) → 06 Dashboard + CSV export
-```
-
-```
+app.py                    Streamlit UI
 reviewlens/
-  schema.py     Pydantic models: ReviewAnalysis, WeeklyInsights (allowed values as Literals)
-  llm.py        Provider factory (OpenAI / Gemini / Claude / mock) - reads .env
-  validate.py   Step 02: column checks and cleaning
-  classify.py   Step 03: prompt | llm.with_structured_output(...), batching, retry, needs_review
-  aggregate.py  Step 04: counts, percentages, top complaints/praise, week-over-week trend
-  report.py     Step 05: map-reduce report chain + plain-text renderer (numbers from pandas)
-  export.py     Step 06: Excel-friendly CSV
-  history.py    Saved official weeks (trend arrows + email source)
-  emailer.py    Builds and sends the weekly report email (SMTP)
-  scheduler.py  Runs the email every Monday (own container)
-  mock.py       Offline stand-in chains with the same contracts (demo + tests)
-app.py          Streamlit UI
-scripts/make_sample_data.py   Generates data/reviews_week40.csv and reviews_week39.csv
-tests/          Offline pytest suite
-```
-
-### Output A: one analysed review
-
-```json
-{
-  "review_id": "R-1042",
-  "sentiment": "negative",
-  "category": "delivery",
-  "urgency": "high",
-  "language": "English",
-  "summary": "Order arrived 70 minutes late and the food was cold.",
-  "suggested_reply": "We are really sorry your order reached late and cold. ..."
-}
-```
-
-| Field | Allowed values |
-|---|---|
-| sentiment | positive, neutral, negative |
-| category | food_quality, delivery, price, staff, packaging, app |
-| urgency | low, medium, high (high = health, refund, abuse, wrong/missing order) |
-| language | English, Tamil, Tanglish, Other |
-
-### Output B: weekly report (format)
-
-```
-WEEKLY FEEDBACK REPORT  |  29 Sep 2026 to 5 Oct 2026
-
-Total reviews: 248   Positive 57%   Neutral 8%   Negative 35%
-
-TOP 3 COMPLAINTS
- 1. Late delivery, mostly 8pm-10pm .... 51 reviews  (mostly Swiggy, 82%)
- ...
-URGENT: 22 review(s) need a reply within 24 hours
-
-ACTION ITEMS
- 1. ...
+  schema.py               Pydantic models: ReviewAnalysis, WeeklyInsights
+  llm.py                  Model factory (OpenAI / Gemini / Claude / mock), reads .env
+  validate.py             Step 02: column checks, cleaning, 500-review limit
+  classify.py             Step 03: structured-output chain, batching, retry, needs_review
+  aggregate.py            Step 04: counts, percentages, top complaints/praise, trends
+  report.py               Step 05: map-reduce report chain + renderer
+  export.py               Step 06: Excel-friendly CSV
+  history.py              Saved official weeks (trend arrows + email source)
+  emailer.py              Weekly report email (SMTP)
+  scheduler.py            Sends the email every Monday (own container)
+data/                     Sample weeks 39 and 40 (English, Tamil, Tanglish)
+docs/                     Build guide PDF + screenshots
+scripts/                  Sample-data generator, PDF builder, screenshot capture
+tests/                    Offline pytest suite
+Dockerfile, docker-compose*.yml, Caddyfile
 ```
 
 ## Tests
 
 ```bash
-pytest -q
+pytest -q        # 15 tests, offline, no API key needed
 ```
-Runs offline (no API key): validation, 200+ row pipeline, retry → `needs_review`, report numbers == table, percentages sum to 100, Excel export round-trip with Tamil text, trend table.
 
-## Verified run (OpenAI `gpt-4o-mini`, `data/reviews_week40.csv`)
-
-- 248 reviews classified in ~52 s at `max_concurrency=8`; 248/248 valid on the first attempt, 0 `needs_review`
-- Languages detected: English 173, Tanglish 52, Tamil 23 — all with correct English summaries, e.g.
-  - *"Order late ah vandhuchu, 9:30 ku dhaan vandhuchu. Food suda illa."* → "The order was delivered late at 9:30 PM and the food was cold."
-  - *"பில்லில் கூடுதல் கட்டணம் போட்டாங்க, சொல்லவே இல்லை."* → "They added an extra charge to the bill without informing me."
-- HIGH urgency: food poisoning / spoiled food, hair, wrong or missing orders, refund demands, money debited without an order, rude staff
-- Weekly report generated in ~6 s; all counts match the enriched table
+Covers CSV validation and the 500 limit, a 200+ row run, retry → `needs_review`, report numbers == table, percentages summing to 100, Excel export with Tamil text, trends, the weekly email and the Monday schedule.
 
 ## Done checklist
 
-- [x] Processes a 200+ row CSV without crashing or timing out (batched, concurrent, per-review error isolation)
-- [x] Every review has all 6 fields and every value is from the allowed list (Pydantic enums + re-validation + retry)
-- [x] Tamil and Tanglish reviews get an English summary
-- [x] Report numbers exactly match the table (calculated in pandas, tested)
-- [x] HIGH urgency filter works; enriched CSV opens correctly in Excel
+- [x] Processes a 200+ row CSV without crashing or timing out (248 reviews ≈ 1 minute)
+- [x] Every review has all 6 fields and every value is from the allowed list
+- [x] Tamil and Tanglish reviews get a correct English summary
+- [x] Report numbers exactly match the table (calculated in pandas)
+- [x] HIGH urgency filter works; the enriched CSV opens correctly in Excel
 - [x] API key loaded from `.env`, never hard-coded
+- [x] Stretch: trend arrows · replies in the review's language · Monday email
+
+## Security notes
+
+- Secrets (`OPENAI_API_KEY`, `SMTP_PASSWORD`) live only in `.env` — git-ignored locally, `chmod 600` on the server.
+- The public app spends on your OpenAI key: keep the per-upload limit (`MAX_REVIEWS`) and set a monthly budget in your OpenAI account.
+- Use a dedicated Gmail account and an App Password for sending; it can be revoked any time.
