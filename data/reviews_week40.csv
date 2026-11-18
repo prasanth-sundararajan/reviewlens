@@ -1,0 +1,252 @@
+review_id,date,platform,rating,review_text
+R-1041,2026-10-03,Google,5,"Saapadu romba nalla irundhuchu, staff um friendly ah pesunanga."
+R-1042,2026-10-04,Swiggy,4,"Neat packaging, nothing spilled, food still warm. Good job."
+R-1043,2026-10-01,Zomato,5,"Best chicken biryani in the area, perfectly spiced and hot."
+R-1044,2026-10-02,Zomato,1,Found a hair in my biryani. Disgusting.
+R-1045,2026-10-04,Google,4,"சாப்பாடு சூப்பர், விலையும் நியாயமாக இருந்தது."
+R-1046,2026-09-30,Swiggy,5,"Biryani was amazing, packing also neat. Will order again!"
+R-1047,2026-09-29,Zomato,2,"Prices increased again, biryani now costs too much for the portion."
+R-1048,2026-10-01,Swiggy,2,"டெலிவரி ரொம்ப தாமதம், உணவு ஆறிப்போச்சு."
+R-1049,2026-10-01,Swiggy,4,"Neat packaging, nothing spilled, food still warm. Good job."
+R-1050,2026-10-04,Swiggy,1,Missing item - raita and gulab jamun were not in the bag. Need refund.
+R-1051,2026-09-29,Swiggy,5,"Biryani semma taste, vera level! Packing um nalla irundhuchu."
+R-1052,2026-10-01,Swiggy,1,"Order late ah vandhuchu, 9:30 ku dhaan vandhuchu. Food suda illa."
+R-1053,2026-10-01,Swiggy,1,"Order late ah vandhuchu, 9:30 ku dhaan vandhuchu. Food suda illa."
+R-1054,2026-10-04,Google,4,"சாப்பாடு சூப்பர், விலையும் நியாயமாக இருந்தது."
+R-1055,2026-09-30,Google,5,"Saapadu romba nalla irundhuchu, staff um friendly ah pesunanga."
+R-1056,2026-10-03,Zomato,5,பிரியாணி மிகவும் சுவையாக இருந்தது. பேக்கிங் அருமை.
+R-1057,2026-09-30,Zomato,5,Great taste and generous portion. Loved the mutton chukka.
+R-1058,2026-10-03,Zomato,5,"Best chicken biryani in the area, perfectly spiced and hot."
+R-1059,2026-10-05,Google,5,"Best chicken biryani in the area, perfectly spiced and hot."
+R-1060,2026-09-29,Google,5,"Saapadu romba nalla irundhuchu, staff um friendly ah pesunanga."
+R-1061,2026-10-05,Swiggy,2,Box was crushed and rice spilled everywhere.
+R-1062,2026-10-02,Swiggy,3,"Saapadu ok dhaan, aana konjam oily ah irundhuchu."
+R-1063,2026-10-03,Zomato,2,"Prices increased again, biryani now costs too much for the portion."
+R-1064,2026-09-29,Zomato,5,"Biryani was amazing, packing also neat. Will order again!"
+R-1065,2026-09-30,Swiggy,3,"Saapadu ok dhaan, aana konjam oily ah irundhuchu."
+R-1066,2026-10-04,Zomato,5,"Best chicken biryani in the area, perfectly spiced and hot."
+R-1067,2026-09-29,Google,5,Staff were very friendly and the service was quick.
+R-1068,2026-09-30,Zomato,5,பிரியாணி மிகவும் சுவையாக இருந்தது. பேக்கிங் அருமை.
+R-1069,2026-10-05,Google,5,"Saapadu romba nalla irundhuchu, staff um friendly ah pesunanga."
+R-1070,2026-10-01,Google,5,Great taste and generous portion. Loved the mutton chukka.
+R-1071,2026-09-30,Swiggy,1,"Ordered at 8pm, came at 9:10. Food fully cold. Very bad."
+R-1072,2026-09-30,Zomato,5,Great taste and generous portion. Loved the mutton chukka.
+R-1073,2026-09-29,Swiggy,4,"Neat packaging, nothing spilled, food still warm. Good job."
+R-1074,2026-10-04,Google,5,Staff were very friendly and the service was quick.
+R-1075,2026-10-01,Google,1,"App crashed while paying via UPI, money debited but no order."
+R-1076,2026-09-29,Google,4,"சாப்பாடு சூப்பர், விலையும் நியாயமாக இருந்தது."
+R-1077,2026-09-29,Google,1,Manager kovama pesunanga when we asked for water. Very rude staff.
+R-1078,2026-09-30,Swiggy,1,"Ordered at 8pm, came at 9:10. Food fully cold. Very bad."
+R-1079,2026-09-29,Swiggy,1,Wrong order delivered! I ordered veg biryani and got chicken. I am vegetarian.
+R-1080,2026-10-04,Google,5,"Nice ambience, tasty food, will come again with family."
+R-1081,2026-10-04,Swiggy,5,Delivered 10 minutes early and the rider was polite.
+R-1082,2026-10-03,Google,4,"சாப்பாடு சூப்பர், விலையும் நியாயமாக இருந்தது."
+R-1083,2026-10-01,Zomato,3,"Average taste, portion could be a bit bigger."
+R-1084,2026-09-30,Google,4,"சாப்பாடு சூப்பர், விலையும் நியாயமாக இருந்தது."
+R-1085,2026-10-01,Zomato,3,"Average taste, portion could be a bit bigger."
+R-1086,2026-10-03,Zomato,5,"Biryani was amazing, packing also neat. Will order again!"
+R-1087,2026-10-01,Swiggy,5,Delivered 10 minutes early and the rider was polite.
+R-1088,2026-09-30,Zomato,5,Great taste and generous portion. Loved the mutton chukka.
+R-1089,2026-10-04,Swiggy,5,"Biryani was amazing, packing also neat. Will order again!"
+R-1090,2026-10-01,Swiggy,1,Wrong order delivered! I ordered veg biryani and got chicken. I am vegetarian.
+R-1091,2026-10-04,Zomato,5,பிரியாணி மிகவும் சுவையாக இருந்தது. பேக்கிங் அருமை.
+R-1092,2026-10-02,Google,4,Good food at a fair price. Parotta and salna were excellent.
+R-1093,2026-10-02,Amazon,4,"Neat packaging, nothing spilled, food still warm. Good job."
+R-1094,2026-10-04,Swiggy,4,Good food at a fair price. Parotta and salna were excellent.
+R-1095,2026-10-03,Amazon,4,"Neat packaging, nothing spilled, food still warm. Good job."
+R-1096,2026-10-05,Amazon,4,"The ready-to-eat biryani kit tastes great, easy to cook."
+R-1097,2026-10-05,Zomato,1,"Biryani kettu pochu, smell vandhuchu. Saapta aprom vayiru vali."
+R-1098,2026-10-02,Swiggy,5,"Biryani was amazing, packing also neat. Will order again!"
+R-1099,2026-09-30,Swiggy,1,"Ordered at 8pm, came at 9:10. Food fully cold. Very bad."
+R-1100,2026-10-03,Zomato,5,"Biryani semma taste, vera level! Packing um nalla irundhuchu."
+R-1101,2026-09-29,Google,1,Waiter was rude and ignored us for 20 minutes.
+R-1102,2026-10-04,Google,3,Decent place. App ordering was a bit confusing but worked.
+R-1103,2026-10-03,Zomato,5,"Best chicken biryani in the area, perfectly spiced and hot."
+R-1104,2026-10-05,Google,5,"Saapadu romba nalla irundhuchu, staff um friendly ah pesunanga."
+R-1105,2026-10-03,Zomato,5,"Biryani was amazing, packing also neat. Will order again!"
+R-1106,2026-09-30,Swiggy,1,"Order late ah vandhuchu, 9:30 ku dhaan vandhuchu. Food suda illa."
+R-1107,2026-09-29,Swiggy,1,"Order late ah vandhuchu, 9:30 ku dhaan vandhuchu. Food suda illa."
+R-1108,2026-10-02,Swiggy,4,"Neat packaging, nothing spilled, food still warm. Good job."
+R-1109,2026-09-29,Swiggy,5,"Biryani was amazing, packing also neat. Will order again!"
+R-1110,2026-09-30,Swiggy,4,Good food at a fair price. Parotta and salna were excellent.
+R-1111,2026-09-30,Google,5,"Nice ambience, tasty food, will come again with family."
+R-1112,2026-09-29,Amazon,4,"Neat packaging, nothing spilled, food still warm. Good job."
+R-1113,2026-10-03,Zomato,5,Great taste and generous portion. Loved the mutton chukka.
+R-1114,2026-10-03,Google,3,"Saapadu ok dhaan, aana konjam oily ah irundhuchu."
+R-1115,2026-10-02,Google,5,"Saapadu romba nalla irundhuchu, staff um friendly ah pesunanga."
+R-1116,2026-10-02,Swiggy,4,Good food at a fair price. Parotta and salna were excellent.
+R-1117,2026-09-30,Amazon,4,"Neat packaging, nothing spilled, food still warm. Good job."
+R-1118,2026-10-05,Google,5,பிரியாணி மிகவும் சுவையாக இருந்தது. பேக்கிங் அருமை.
+R-1119,2026-09-30,Zomato,5,"Biryani semma taste, vera level! Packing um nalla irundhuchu."
+R-1120,2026-10-03,Google,5,"Best chicken biryani in the area, perfectly spiced and hot."
+R-1121,2026-09-30,Zomato,5,"Best chicken biryani in the area, perfectly spiced and hot."
+R-1122,2026-10-05,Google,4,Good food at a fair price. Parotta and salna were excellent.
+R-1123,2026-09-30,Zomato,3,"Food was okay, nothing special. Delivery on time."
+R-1124,2026-10-02,Google,5,Staff were very friendly and the service was quick.
+R-1125,2026-09-29,Zomato,5,"Biryani was amazing, packing also neat. Will order again!"
+R-1126,2026-10-04,Zomato,5,"Best chicken biryani in the area, perfectly spiced and hot."
+R-1127,2026-10-02,Swiggy,1,Delivery rider shouted at me over the phone. Unacceptable behaviour.
+R-1128,2026-10-03,Amazon,4,"The ready-to-eat biryani kit tastes great, easy to cook."
+R-1129,2026-10-04,Google,5,Great taste and generous portion. Loved the mutton chukka.
+R-1130,2026-10-01,Google,5,"Best chicken biryani in the area, perfectly spiced and hot."
+R-1131,2026-10-04,Swiggy,5,"Biryani was amazing, packing also neat. Will order again!"
+R-1132,2026-09-30,Swiggy,1,Wrong order delivered! I ordered veg biryani and got chicken. I am vegetarian.
+R-1133,2026-09-29,Google,2,Portion size is very small for the price.
+R-1134,2026-10-02,Swiggy,1,"Order late ah vandhuchu, 9:30 ku dhaan vandhuchu. Food suda illa."
+R-1135,2026-10-01,Google,5,"Saapadu romba nalla irundhuchu, staff um friendly ah pesunanga."
+R-1136,2026-10-05,Zomato,2,"Prices increased again, biryani now costs too much for the portion."
+R-1137,2026-10-04,Swiggy,2,"Gravy leaked all over the bag, container lid was not sealed."
+R-1138,2026-10-04,Amazon,4,"The ready-to-eat biryani kit tastes great, easy to cook."
+R-1139,2026-10-05,Google,5,Great taste and generous portion. Loved the mutton chukka.
+R-1140,2026-09-30,Google,5,"Saapadu romba nalla irundhuchu, staff um friendly ah pesunanga."
+R-1141,2026-10-03,Google,5,Great taste and generous portion. Loved the mutton chukka.
+R-1142,2026-10-03,Google,5,பிரியாணி மிகவும் சுவையாக இருந்தது. பேக்கிங் அருமை.
+R-1143,2026-09-30,Google,1,"App crashed while paying via UPI, money debited but no order."
+R-1144,2026-10-05,Zomato,5,"Biryani was amazing, packing also neat. Will order again!"
+R-1145,2026-09-30,Zomato,2,"Prices increased again, biryani now costs too much for the portion."
+R-1146,2026-09-30,Swiggy,1,"Ordered at 8pm, came at 9:10. Food fully cold. Very bad."
+R-1147,2026-10-01,Zomato,5,"Biryani was amazing, packing also neat. Will order again!"
+R-1148,2026-10-05,Zomato,5,"Best chicken biryani in the area, perfectly spiced and hot."
+R-1149,2026-10-02,Swiggy,1,"Order late ah vandhuchu, 9:30 ku dhaan vandhuchu. Food suda illa."
+R-1150,2026-10-01,Zomato,3,"Average taste, portion could be a bit bigger."
+R-1151,2026-10-01,Google,5,"Best chicken biryani in the area, perfectly spiced and hot."
+R-1152,2026-10-05,Google,5,"Saapadu romba nalla irundhuchu, staff um friendly ah pesunanga."
+R-1153,2026-10-04,Swiggy,3,"Food was okay, nothing special. Delivery on time."
+R-1154,2026-10-05,Zomato,5,Great taste and generous portion. Loved the mutton chukka.
+R-1155,2026-09-30,Swiggy,4,"Neat packaging, nothing spilled, food still warm. Good job."
+R-1156,2026-10-03,Swiggy,5,"Biryani was amazing, packing also neat. Will order again!"
+R-1157,2026-10-01,Google,5,"Saapadu romba nalla irundhuchu, staff um friendly ah pesunanga."
+R-1158,2026-09-30,Swiggy,1,"Order late ah vandhuchu, 9:30 ku dhaan vandhuchu. Food suda illa."
+R-1159,2026-09-30,Google,5,Great taste and generous portion. Loved the mutton chukka.
+R-1160,2026-10-02,Google,5,"Best chicken biryani in the area, perfectly spiced and hot."
+R-1161,2026-10-03,Google,5,"Nice ambience, tasty food, will come again with family."
+R-1162,2026-09-30,Zomato,1,"Biryani kettu pochu, smell vandhuchu. Saapta aprom vayiru vali."
+R-1163,2026-10-05,Google,5,Staff were very friendly and the service was quick.
+R-1164,2026-10-05,Zomato,1,Wrong order delivered! I ordered veg biryani and got chicken. I am vegetarian.
+R-1165,2026-09-30,Swiggy,2,"Too much salt in the gravy, could not eat it."
+R-1166,2026-09-29,Swiggy,1,"Ordered at 8pm, came at 9:10. Food fully cold. Very bad."
+R-1167,2026-09-30,Google,4,Good food at a fair price. Parotta and salna were excellent.
+R-1168,2026-10-02,Zomato,3,"Average taste, portion could be a bit bigger."
+R-1169,2026-10-02,Swiggy,3,"Food was okay, nothing special. Delivery on time."
+R-1170,2026-10-02,Swiggy,4,Good food at a fair price. Parotta and salna were excellent.
+R-1171,2026-10-03,Swiggy,3,"Food was okay, nothing special. Delivery on time."
+R-1172,2026-10-05,Zomato,5,பிரியாணி மிகவும் சுவையாக இருந்தது. பேக்கிங் அருமை.
+R-1173,2026-10-02,Swiggy,1,"Ordered at 8pm, came at 9:10. Food fully cold. Very bad."
+R-1174,2026-10-02,Swiggy,4,Good food at a fair price. Parotta and salna were excellent.
+R-1175,2026-09-30,Swiggy,5,Delivered 10 minutes early and the rider was polite.
+R-1176,2026-10-03,Google,1,"App crashed while paying via UPI, money debited but no order."
+R-1177,2026-09-29,Swiggy,1,"Order late ah vandhuchu, 9:30 ku dhaan vandhuchu. Food suda illa."
+R-1178,2026-10-02,Google,5,"Saapadu romba nalla irundhuchu, staff um friendly ah pesunanga."
+R-1179,2026-10-05,Google,3,Decent place. App ordering was a bit confusing but worked.
+R-1180,2026-10-05,Swiggy,1,"Ordered at 8pm, came at 9:10. Food fully cold. Very bad."
+R-1181,2026-10-02,Google,3,"Saapadu ok dhaan, aana konjam oily ah irundhuchu."
+R-1182,2026-10-03,Swiggy,5,"Biryani was amazing, packing also neat. Will order again!"
+R-1183,2026-10-04,Google,2,Saapadu nalla irundhuchu but bill la extra charge pottanga
+R-1184,2026-09-29,Zomato,5,Great taste and generous portion. Loved the mutton chukka.
+R-1185,2026-10-05,Google,3,Decent place. App ordering was a bit confusing but worked.
+R-1186,2026-09-30,Google,5,பிரியாணி மிகவும் சுவையாக இருந்தது. பேக்கிங் அருமை.
+R-1187,2026-10-02,Swiggy,1,"Order late ah vandhuchu, 9:30 ku dhaan vandhuchu. Food suda illa."
+R-1188,2026-10-01,Google,5,"Nice ambience, tasty food, will come again with family."
+R-1189,2026-09-30,Amazon,4,"Neat packaging, nothing spilled, food still warm. Good job."
+R-1190,2026-10-01,Zomato,1,"Biryani kettu pochu, smell vandhuchu. Saapta aprom vayiru vali."
+R-1191,2026-10-03,Google,5,Staff were very friendly and the service was quick.
+R-1192,2026-10-03,Zomato,3,"Food was okay, nothing special. Delivery on time."
+R-1193,2026-09-30,Swiggy,2,"டெலிவரி ரொம்ப தாமதம், உணவு ஆறிப்போச்சு."
+R-1194,2026-10-03,Google,1,"App crashed while paying via UPI, money debited but no order."
+R-1195,2026-10-02,Amazon,4,"Neat packaging, nothing spilled, food still warm. Good job."
+R-1196,2026-09-30,Swiggy,3,"Food was okay, nothing special. Delivery on time."
+R-1197,2026-10-03,Zomato,2,"Delivery took 75 minutes on Friday night, biryani was cold."
+R-1198,2026-09-30,Swiggy,2,"டெலிவரி ரொம்ப தாமதம், உணவு ஆறிப்போச்சு."
+R-1199,2026-09-30,Zomato,5,"Best chicken biryani in the area, perfectly spiced and hot."
+R-1200,2026-10-03,Zomato,1,Missing item - raita and gulab jamun were not in the bag. Need refund.
+R-1201,2026-09-30,Google,5,"Saapadu romba nalla irundhuchu, staff um friendly ah pesunanga."
+R-1202,2026-10-01,Google,3,"Average taste, portion could be a bit bigger."
+R-1203,2026-10-05,Zomato,5,"Best chicken biryani in the area, perfectly spiced and hot."
+R-1204,2026-10-02,Swiggy,5,"Biryani was amazing, packing also neat. Will order again!"
+R-1205,2026-10-05,Swiggy,5,"Biryani was amazing, packing also neat. Will order again!"
+R-1206,2026-10-05,Zomato,5,"Biryani was amazing, packing also neat. Will order again!"
+R-1207,2026-10-01,Google,5,"Nice ambience, tasty food, will come again with family."
+R-1208,2026-10-04,Swiggy,1,"Ordered at 8pm, came at 9:10. Food fully cold. Very bad."
+R-1209,2026-09-30,Swiggy,1,Missing item - raita and gulab jamun were not in the bag. Need refund.
+R-1210,2026-10-02,Swiggy,3,"Saapadu ok dhaan, aana konjam oily ah irundhuchu."
+R-1211,2026-09-29,Google,5,"Saapadu romba nalla irundhuchu, staff um friendly ah pesunanga."
+R-1212,2026-09-29,Swiggy,2,"Gravy leaked all over the bag, container lid was not sealed."
+R-1213,2026-10-03,Zomato,5,Great taste and generous portion. Loved the mutton chukka.
+R-1214,2026-09-29,Google,5,"Saapadu romba nalla irundhuchu, staff um friendly ah pesunanga."
+R-1215,2026-10-04,Swiggy,2,"Gravy leaked all over the bag, container lid was not sealed."
+R-1216,2026-09-29,Zomato,5,Great taste and generous portion. Loved the mutton chukka.
+R-1217,2026-10-03,Swiggy,2,"Delivery took 75 minutes on Friday night, biryani was cold."
+R-1218,2026-10-03,Swiggy,5,"Biryani semma taste, vera level! Packing um nalla irundhuchu."
+R-1219,2026-10-01,Swiggy,3,"Saapadu ok dhaan, aana konjam oily ah irundhuchu."
+R-1220,2026-09-29,Zomato,3,"Average taste, portion could be a bit bigger."
+R-1221,2026-10-02,Google,2,Saapadu nalla irundhuchu but bill la extra charge pottanga
+R-1222,2026-09-29,Zomato,5,"Biryani was amazing, packing also neat. Will order again!"
+R-1223,2026-09-30,Zomato,5,"Biryani was amazing, packing also neat. Will order again!"
+R-1224,2026-10-02,Google,5,"Nice ambience, tasty food, will come again with family."
+R-1225,2026-10-03,Swiggy,1,"Order late ah vandhuchu, 9:30 ku dhaan vandhuchu. Food suda illa."
+R-1226,2026-10-04,Swiggy,3,"Food was okay, nothing special. Delivery on time."
+R-1227,2026-09-30,Zomato,2,"Delivery took 75 minutes on Friday night, biryani was cold."
+R-1228,2026-10-02,Swiggy,2,"டெலிவரி ரொம்ப தாமதம், உணவு ஆறிப்போச்சு."
+R-1229,2026-10-05,Amazon,4,"Neat packaging, nothing spilled, food still warm. Good job."
+R-1230,2026-09-29,Google,2,"பில்லில் கூடுதல் கட்டணம் போட்டாங்க, சொல்லவே இல்லை."
+R-1231,2026-10-02,Swiggy,1,"Order late ah vandhuchu, 9:30 ku dhaan vandhuchu. Food suda illa."
+R-1232,2026-10-04,Google,2,"பில்லில் கூடுதல் கட்டணம் போட்டாங்க, சொல்லவே இல்லை."
+R-1233,2026-10-03,Swiggy,3,"Food was okay, nothing special. Delivery on time."
+R-1234,2026-10-05,Google,2,Saapadu nalla irundhuchu but bill la extra charge pottanga
+R-1235,2026-10-04,Google,5,"Saapadu romba nalla irundhuchu, staff um friendly ah pesunanga."
+R-1236,2026-10-01,Swiggy,5,Delivered 10 minutes early and the rider was polite.
+R-1237,2026-10-04,Zomato,5,"Biryani was amazing, packing also neat. Will order again!"
+R-1238,2026-09-29,Swiggy,2,"Gravy leaked all over the bag, container lid was not sealed."
+R-1239,2026-10-04,Google,5,"Saapadu romba nalla irundhuchu, staff um friendly ah pesunanga."
+R-1240,2026-10-03,Zomato,5,பிரியாணி மிகவும் சுவையாக இருந்தது. பேக்கிங் அருமை.
+R-1241,2026-09-29,Amazon,4,"Neat packaging, nothing spilled, food still warm. Good job."
+R-1242,2026-09-29,Google,3,"Average taste, portion could be a bit bigger."
+R-1243,2026-10-05,Zomato,5,Great taste and generous portion. Loved the mutton chukka.
+R-1244,2026-09-29,Google,3,"Average taste, portion could be a bit bigger."
+R-1245,2026-09-29,Zomato,1,Wrong order delivered! I ordered veg biryani and got chicken. I am vegetarian.
+R-1246,2026-10-01,Google,5,Staff were very friendly and the service was quick.
+R-1247,2026-10-03,Swiggy,1,Missing item - raita and gulab jamun were not in the bag. Need refund.
+R-1248,2026-10-04,Google,5,Staff were very friendly and the service was quick.
+R-1249,2026-09-30,Google,5,"Nice ambience, tasty food, will come again with family."
+R-1250,2026-10-01,Zomato,1,Missing item - raita and gulab jamun were not in the bag. Need refund.
+R-1251,2026-10-03,Swiggy,1,"Order late ah vandhuchu, 9:30 ku dhaan vandhuchu. Food suda illa."
+R-1252,2026-10-03,Google,4,"சாப்பாடு சூப்பர், விலையும் நியாயமாக இருந்தது."
+R-1253,2026-09-30,Zomato,5,"Best chicken biryani in the area, perfectly spiced and hot."
+R-1254,2026-09-29,Zomato,2,"Prices increased again, biryani now costs too much for the portion."
+R-1255,2026-10-03,Zomato,2,"Delivery took 75 minutes on Friday night, biryani was cold."
+R-1256,2026-10-04,Zomato,5,"Biryani was amazing, packing also neat. Will order again!"
+R-1257,2026-10-03,Google,2,"Prices increased again, biryani now costs too much for the portion."
+R-1258,2026-10-02,Zomato,3,"Average taste, portion could be a bit bigger."
+R-1259,2026-09-29,Google,1,"App crashed while paying via UPI, money debited but no order."
+R-1260,2026-10-02,Google,4,"சாப்பாடு சூப்பர், விலையும் நியாயமாக இருந்தது."
+R-1261,2026-10-05,Google,2,"Prices increased again, biryani now costs too much for the portion."
+R-1262,2026-10-05,Swiggy,3,"Saapadu ok dhaan, aana konjam oily ah irundhuchu."
+R-1263,2026-10-03,Swiggy,1,Missing item - raita and gulab jamun were not in the bag. Need refund.
+R-1264,2026-10-03,Zomato,5,"Biryani semma taste, vera level! Packing um nalla irundhuchu."
+R-1265,2026-10-02,Google,5,"Best chicken biryani in the area, perfectly spiced and hot."
+R-1266,2026-10-04,Swiggy,3,"Food was okay, nothing special. Delivery on time."
+R-1267,2026-10-01,Google,2,Saapadu nalla irundhuchu but bill la extra charge pottanga
+R-1268,2026-10-02,Google,2,"Prices increased again, biryani now costs too much for the portion."
+R-1269,2026-10-01,Google,5,"Saapadu romba nalla irundhuchu, staff um friendly ah pesunanga."
+R-1270,2026-10-04,Swiggy,1,Delivery rider shouted at me over the phone. Unacceptable behaviour.
+R-1271,2026-10-01,Swiggy,4,Good food at a fair price. Parotta and salna were excellent.
+R-1272,2026-09-30,Google,5,Great taste and generous portion. Loved the mutton chukka.
+R-1273,2026-10-05,Google,5,"Nice ambience, tasty food, will come again with family."
+R-1274,2026-09-30,Zomato,5,"Best chicken biryani in the area, perfectly spiced and hot."
+R-1275,2026-09-29,Swiggy,1,"Order late ah vandhuchu, 9:30 ku dhaan vandhuchu. Food suda illa."
+R-1276,2026-10-04,Google,5,Great taste and generous portion. Loved the mutton chukka.
+R-1277,2026-10-04,Zomato,5,"Biryani was amazing, packing also neat. Will order again!"
+R-1278,2026-09-30,Google,5,"Saapadu romba nalla irundhuchu, staff um friendly ah pesunanga."
+R-1279,2026-10-04,Google,5,Staff were very friendly and the service was quick.
+R-1280,2026-09-29,Swiggy,5,"Biryani semma taste, vera level! Packing um nalla irundhuchu."
+R-1281,2026-10-04,Google,5,Great taste and generous portion. Loved the mutton chukka.
+R-1282,2026-09-30,Google,4,Good food at a fair price. Parotta and salna were excellent.
+R-1283,2026-10-01,Swiggy,1,Chicken was stale and smelled bad. My son vomited after eating.
+R-1284,2026-09-29,Google,4,"சாப்பாடு சூப்பர், விலையும் நியாயமாக இருந்தது."
+R-1285,2026-10-01,Google,2,Coupon not applied at checkout and payment failed twice.
+R-1286,2026-10-04,Google,2,Portion size is very small for the price.
+R-1287,2026-10-03,Google,3,Decent place. App ordering was a bit confusing but worked.
+R-1288,2026-10-04,Google,4,"சாப்பாடு சூப்பர், விலையும் நியாயமாக இருந்தது."
+R-9001,2026-10-02,Google,4,
+R-9002,2026-10-03,Zomato,3,   
+R-1041,2026-10-03,Google,5,"Saapadu romba nalla irundhuchu, staff um friendly ah pesunanga."
