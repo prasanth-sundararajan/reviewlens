@@ -112,16 +112,27 @@ def build_message(week: SavedWeek | None, settings: SMTPSettings, app_url: str =
     return msg
 
 
+def _login(smtp: smtplib.SMTP, settings: SMTPSettings) -> None:
+    """Log in with AUTH PLAIN only, so a wrong password surfaces as Gmail's clear 535 error
+    instead of a confusing 'connection closed' from smtplib's fallback to another method."""
+    smtp.ehlo_or_helo_if_needed()
+    if smtp.has_extn("auth") and "PLAIN" in smtp.esmtp_features["auth"].upper().split():
+        smtp.user, smtp.password = settings.user, settings.password.replace(" ", "")
+        smtp.auth("PLAIN", smtp.auth_plain)
+    else:
+        smtp.login(settings.user, settings.password)
+
+
 def send_message(msg: EmailMessage, settings: SMTPSettings) -> None:
     context = ssl.create_default_context()
     if settings.port == 465:
         with smtplib.SMTP_SSL(settings.host, settings.port, context=context, timeout=30) as smtp:
-            smtp.login(settings.user, settings.password)
+            _login(smtp, settings)
             smtp.send_message(msg)
     else:
         with smtplib.SMTP(settings.host, settings.port, timeout=30) as smtp:
             smtp.starttls(context=context)
-            smtp.login(settings.user, settings.password)
+            _login(smtp, settings)
             smtp.send_message(msg)
 
 
