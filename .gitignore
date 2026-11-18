@@ -8,3 +8,4 @@ venv/
 *.log
 static/
 .claude/
+deploy-credentials.txt
