@@ -9,6 +9,6 @@
 		reverse_proxy reviewlens:8501
 	}
 	handle {
-		redir /{$APP_PATH}/ 302
+		redir * /{$APP_PATH}/ 302
 	}
 }
