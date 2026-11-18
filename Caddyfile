@@ -3,7 +3,8 @@
 # The app is served under /{$APP_PATH}/ ; any other path redirects there.
 {$APP_DOMAIN} {
 	encode gzip
-	@app path /{$APP_PATH} /{$APP_PATH}/*
+	redir /{$APP_PATH} /{$APP_PATH}/ 308
+	@app path /{$APP_PATH}/*
 	handle @app {
 		reverse_proxy reviewlens:8501
 	}
