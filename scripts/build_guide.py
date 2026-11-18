@@ -457,7 +457,63 @@ ssh -i ~/.ssh/reviewlens_vps root@<server-ip> "cd /opt/reviewlens && git pull &&
           PageBreak()]
 
     # ------------------------------------------------------------------ checklist, ops, troubleshooting
-    s += [h1("17. Done checklist"),
+    s += [h1("17. Step 15 - Deploy on Hostinger VPS (hPanel)"),
+          p("This is exactly how the live app was deployed. Hostinger <b>shared / web hosting cannot run Python "
+            "apps</b> - use a <b>Hostinger VPS</b> (KVM plan) with an Ubuntu template."),
+          table([["#", "Where", "What to do"],
+                 ["1", "hPanel -> VPS", "Pick the VPS (Ubuntu 24.04 or newer). Note its <b>IP address</b>. Recommended: "
+                  "create a <b>snapshot</b> first (Snapshots &amp; backups) so you can roll back."],
+                 ["2", "Laptop + hPanel -> VPS -> Settings -> SSH keys", "Create a key with ssh-keygen (below) and paste "
+                  "the <b>.pub</b> line into hPanel. Test: ssh -i key root@&lt;VPS-IP&gt;."],
+                 ["3", "hPanel -> Domains -> DNS", "Add an <b>A record</b> www -> &lt;VPS-IP&gt; (TTL 300). Delete an existing "
+                  "www <b>CNAME</b> first. Check with nslookup."],
+                 ["4", "SSH session", "Install Docker: apt-get install docker.io docker-compose-v2 git."],
+                 ["5", "SSH session", "git clone to /opt/reviewlens, cp .env.example .env, fill it in, chmod 600 .env."],
+                 ["6", "SSH session", "Start with the production compose file - Caddy gets the HTTPS certificate."],
+                 ["7", "SSH session", "Optional: send a [TEST] email; check the scheduler log."],
+                 ["8", "Laptop", "After every git push: git pull + rebuild over SSH (one command)."]],
+                [8, 52, 110]),
+          h2("Step 2 - SSH key (Windows PowerShell on your laptop)"),
+          code(r"""
+ssh-keygen -t ed25519 -f $HOME\.ssh\reviewlens_vps     # Enter = no passphrase
+Get-Content $HOME\.ssh\reviewlens_vps.pub              # copy into hPanel -> SSH keys
+ssh -i $HOME\.ssh\reviewlens_vps root@<VPS-IP>         # test the login
+"""),
+          h2("Steps 4-6 - On the VPS"),
+          code("""
+apt-get update && apt-get install -y docker.io docker-compose-v2 git
+systemctl enable --now docker
+git clone https://github.com/<you>/reviewlens.git /opt/reviewlens
+cd /opt/reviewlens && cp .env.example .env && nano .env && chmod 600 .env
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.yml -f docker-compose.prod.yml ps
+"""),
+          table([["Setting in the server .env", "Example / note"],
+                 ["OPENAI_API_KEY", "sk-...  (required)"],
+                 ["APP_DOMAIN", "www.yourdomain.com - must match the DNS A record"],
+                 ["APP_PATH", "techstack -> app at https://www.yourdomain.com/techstack/"],
+                 ["MAX_REVIEWS", "500 - cost guard per upload"],
+                 ["APP_PASSWORD", "empty = public; set a value to require a login"],
+                 ["SMTP_HOST / PORT / USER / PASSWORD, REPORT_RECIPIENTS", "Optional Monday email (Gmail App Password)"],
+                 ["APP_URL", "https://www.yourdomain.com/techstack/ - link in the email"]],
+                [75, 95]),
+          KeepTogether([h2("Steps 7-8 - Test the email and update later"), code(r"""
+docker compose -f docker-compose.yml -f docker-compose.prod.yml exec scheduler \
+  python -m reviewlens.emailer --test
+# from the laptop, after git push:
+ssh -i $HOME\.ssh\reviewlens_vps root@<VPS-IP> "cd /opt/reviewlens && git pull && \
+  docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build"
+""")]),
+          table([["Problem on Hostinger", "Fix"],
+                 ["Certificate not issued", "DNS A record not on the VPS yet, or ports 80/443 used by another service"],
+                 ["Hostinger 'Parked domain' page shows", "www is still a CNAME to the parked root - replace it with an A record"],
+                 ["Permission denied (publickey)", "Add the .pub key in hPanel -> VPS -> SSH keys and use ssh -i"],
+                 ["Docker Manager in hPanel does not list the app", "Normal: it only covers Hostinger's Docker OS template; "
+                  "manage the app with docker compose over SSH"]],
+                [62, 108]),
+          PageBreak()]
+
+    s += [h1("18. Done checklist"),
           table([["Requirement", "How it is met", "Status"],
                  ["Processes a 200+ row CSV without crashing", "Batched, concurrent, per-review error isolation (248 rows in about 1 minute)", "Done"],
                  ["All 6 fields, only allowed values", "Pydantic Literal enums + re-validation + retry", "Done"],
@@ -470,14 +526,14 @@ ssh -i ~/.ssh/reviewlens_vps root@<server-ip> "cd /opt/reviewlens && git pull &&
                  ["Stretch: Monday email", "scheduler container + Gmail SMTP", "Done"]],
                 [55, 95, 20]),
 
-          h1("18. Weekly routine for the manager"),
+          h1("19. Weekly routine for the manager"),
           *bullets(["Export the week's reviews to a CSV (review_id, date, platform, rating, review_text).",
                     "Open the app, upload, click <b>Analyse</b>; read the dashboard and filter <b>HIGH urgency only</b>.",
                     "Reply to urgent reviews using the suggested replies; download the enriched CSV for the support team.",
                     "Click <b>Save as this week's official report</b> - next week shows trend arrows, and the report "
                     "is emailed on Monday at 09:00."]),
 
-          h1("19. Troubleshooting"),
+          h1("20. Troubleshooting"),
           table([["Problem", "Fix"],
                  ["'OPENAI_API_KEY is not set'", "Add the key to .env (locally) or the server's .env, then restart."],
                  ["Analysis failed / rate limit", "Lower 'Parallel requests' in the sidebar; check your OpenAI budget."],
@@ -492,7 +548,7 @@ ssh -i ~/.ssh/reviewlens_vps root@<server-ip> "cd /opt/reviewlens && git pull &&
           note("Security: keep the OpenAI key and Gmail App Password only in .env files (chmod 600 on the server). "
                "Use a separate Gmail account for sending and set a monthly OpenAI budget - a public app spends on your key."),
           PageBreak(),
-          h1("20. Usage outputs (screenshots)"),
+          h1("21. Usage outputs (screenshots)"),
           p("Real output from the finished app (OpenAI gpt-4o-mini, sample week 40 compared with saved week 39). "
             "The same images are in <b>docs/screenshots/</b> in the repository."),
           ]

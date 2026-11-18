@@ -70,32 +70,133 @@ More: [start page](docs/screenshots/01_start_page.png) · [500-review limit mess
 | SMTP (Gmail App Password) | Monday report email |
 | pytest | 15 offline tests |
 
-## Quick start
+## Run on your laptop
+
+You need **Python 3.11+**, **Git** and an **OpenAI API key** (for option B also **Docker Desktop**).
+
+### Option A — Python (quickest)
 
 ```bash
 git clone https://github.com/prasanth-sundararajan/reviewlens.git
 cd reviewlens
-python -m venv .venv && .venv\Scripts\activate      # macOS/Linux: source .venv/bin/activate
+python -m venv .venv
+.venv\Scripts\activate                 # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-copy .env.example .env                              # macOS/Linux: cp; then add OPENAI_API_KEY
-streamlit run app.py                                # http://localhost:8501
+copy .env.example .env                 # macOS/Linux: cp .env.example .env
 ```
 
-Upload `data/reviews_week40.csv` and click **Analyse**. No API key yet? Set `LLM_PROVIDER=mock` in `.env` to try the whole app offline.
-
-### Docker
+Open `.env` and set `OPENAI_API_KEY=sk-...` (keep `LLM_PROVIDER=openai`), then:
 
 ```bash
-docker compose up -d --build          # app + Monday-email scheduler, http://localhost:8501
+streamlit run app.py                   # opens http://localhost:8501
 ```
 
-Production with HTTPS (Caddy + Let's Encrypt): point a DNS A record at the server, set `OPENAI_API_KEY`, `APP_DOMAIN` (e.g. `www.example.com`) and optionally `APP_PATH` (default `techstack`) in `.env`, then:
+Upload `data/reviews_week40.csv` (or use the *Download sample* button) and click **Analyse**.
+No API key yet? Set `LLM_PROVIDER=mock` in `.env` to try the whole app offline (keyword-based results).
+
+### Option B — Docker (same setup as the server)
+
+```bash
+copy .env.example .env                 # add OPENAI_API_KEY
+docker compose up -d --build           # app + Monday-email scheduler → http://localhost:8501
+docker compose ps                      # both services should be "Up"
+docker compose logs -f reviewlens      # watch the app log (Ctrl+C to stop watching)
+docker compose down                    # stop everything
+```
+
+### Check it works
+
+```bash
+pytest -q                              # 15 offline tests, no API key needed
+```
+
+## Deploy on Hostinger (VPS)
+
+This is how the live app at `https://www.kowsalyagroups.com/techstack/` is deployed. Hostinger **shared/web hosting cannot run Python apps** — use a **Hostinger VPS** (KVM plan, e.g. KVM 2) with Ubuntu.
+
+**1. Get the VPS ready (hPanel)**
+- In **hPanel → VPS**, choose your server with an **Ubuntu** template (plain Ubuntu 24.04+ works; you install Docker yourself in step 4). Note its **IP address**.
+- *Recommended:* create a **snapshot** first (VPS → Snapshots & backups) so you can roll back.
+
+**2. Create an SSH key on your laptop and add it in hPanel**
+
+```powershell
+ssh-keygen -t ed25519 -f $HOME\.ssh\reviewlens_vps      # press Enter for no passphrase
+Get-Content $HOME\.ssh\reviewlens_vps.pub               # copy this line
+```
+
+In **hPanel → VPS → Settings → SSH keys**, add the copied public key. Test the login:
+
+```powershell
+ssh -i $HOME\.ssh\reviewlens_vps root@<VPS-IP>
+```
+
+**3. Point your domain at the VPS (hPanel → Domains → your domain → DNS / Nameservers)**
+- Add an **A record**: name `www` → value `<VPS-IP>`, TTL 300.
+- If `www` already exists as a **CNAME**, delete it first (a name cannot have both).
+- Check: `nslookup www.yourdomain.com` should show `<VPS-IP>` (usually within minutes).
+
+**4. Install Docker on the VPS** (in the SSH session)
+
+```bash
+apt-get update && apt-get install -y docker.io docker-compose-v2 git
+systemctl enable --now docker
+docker --version && docker compose version
+```
+
+**5. Get the code and create the server `.env`**
+
+```bash
+git clone https://github.com/prasanth-sundararajan/reviewlens.git /opt/reviewlens
+cd /opt/reviewlens
+cp .env.example .env
+nano .env                  # fill in the values below, then Ctrl+O, Enter, Ctrl+X
+chmod 600 .env             # only root can read the secrets
+```
+
+| Setting in `.env` | Example | Notes |
+|---|---|---|
+| `OPENAI_API_KEY` | `sk-...` | Required |
+| `APP_DOMAIN` | `www.yourdomain.com` | Must match the DNS A record |
+| `APP_PATH` | `techstack` | App is served at `https://www.yourdomain.com/techstack/` |
+| `MAX_REVIEWS` | `500` | Cost guard per upload |
+| `APP_PASSWORD` | *(empty)* | Set a value to require a login; leave empty for public access |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `REPORT_RECIPIENTS` | `smtp.gmail.com`, `587`, … | Optional — Monday email (see below) |
+| `APP_URL` | `https://www.yourdomain.com/techstack/` | Link inside the email |
+
+**6. Start it with HTTPS**
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.yml -f docker-compose.prod.yml ps        # caddy, reviewlens, scheduler = Up
+docker compose -f docker-compose.yml -f docker-compose.prod.yml logs caddy | grep "certificate obtained"
 ```
 
-The full walkthrough — project setup, every module, tests, Docker, GitHub, VPS deploy, DNS, HTTPS and Gmail — is in the **[build guide PDF](docs/ReviewLens_Build_Guide.pdf)**.
+Caddy gets a free **Let's Encrypt** certificate automatically (ports 80/443 must be free). Open `https://www.yourdomain.com/techstack/` — plain `http://` and `/` redirect there, and port 8501 is not exposed to the internet.
+
+**7. (Optional) Test the weekly email**
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml exec scheduler python -m reviewlens.emailer --test
+docker compose -f docker-compose.yml -f docker-compose.prod.yml logs scheduler   # "next weekly email at ... Monday 09:00"
+```
+
+**8. Update after you push changes to GitHub** (from your laptop)
+
+```powershell
+ssh -i $HOME\.ssh\reviewlens_vps root@<VPS-IP> "cd /opt/reviewlens && git pull && docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build"
+```
+
+The app and scheduler restart automatically after crashes and server reboots (`restart: unless-stopped`).
+
+| Problem on Hostinger | Fix |
+|---|---|
+| Certificate not issued | DNS A record not pointing at the VPS yet, or ports 80/443 used by another service |
+| Site shows Hostinger "Parked domain" page | `www` still a CNAME to the parked root — replace it with an A record |
+| `Permission denied (publickey)` | Add the `.pub` key in hPanel → VPS → SSH keys; use `ssh -i <key>` |
+| Email `535 Username and Password not accepted` | `SMTP_USER` must be the Gmail account that created the App Password |
+
+The full walkthrough — project setup, every module, tests, Docker, GitHub, Hostinger, DNS, HTTPS and Gmail — is in the **[build guide PDF](docs/ReviewLens_Build_Guide.pdf)**.
 
 ### Weekly email (optional)
 
