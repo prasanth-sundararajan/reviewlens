@@ -3,6 +3,10 @@
 # The app is served under /{$APP_PATH}/ ; any other path redirects there.
 {$APP_DOMAIN} {
 	encode gzip
+	# Other apps on the same server (e.g. LaunchScout at /techstack/launchscout/) drop their
+	# own route files into ./sites.d/*.caddy. They are imported before ReviewLens' route, so
+	# their paths win; with no files there this line does nothing.
+	import /etc/caddy/sites.d/*.caddy
 	redir /{$APP_PATH} /{$APP_PATH}/ 308
 	@app path /{$APP_PATH}/*
 	handle @app {

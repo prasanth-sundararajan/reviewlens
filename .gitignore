@@ -10,3 +10,5 @@ static/
 .claude/
 deploy-credentials.txt
 history/
+# Route files of other apps on the server (see sites.d/README.md)
+sites.d/*.caddy

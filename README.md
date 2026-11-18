@@ -2,7 +2,7 @@
 
 > **Track 1 Gen AI | LangChain — Use case 01 (Intermediate).** Turn hundreds of raw customer reviews into tagged, prioritised insights and a weekly report a manager can act on in five minutes.
 
-🌐 **Live app:** https://www.kowsalyagroups.com/techstack/
+🌐 **Live app:** https://www.kowsalyagroups.com/techstack/ReviewLens/
 📘 **Step-by-step build & deploy guide (PDF):** [docs/ReviewLens_Build_Guide.pdf](docs/ReviewLens_Build_Guide.pdf)
 📥 **Sample data:** [reviews_week40.csv](https://github.com/prasanth-sundararajan/reviewlens/releases/download/v1.0/reviews_week40.csv)
 
@@ -112,7 +112,7 @@ pytest -q                              # 15 offline tests, no API key needed
 
 ## Deploy on Hostinger (VPS)
 
-This is how the live app at `https://www.kowsalyagroups.com/techstack/` is deployed. Hostinger **shared/web hosting cannot run Python apps** — use a **Hostinger VPS** (KVM plan, e.g. KVM 2) with Ubuntu.
+This is how the live app at `https://www.kowsalyagroups.com/techstack/ReviewLens/` is deployed (`APP_PATH=techstack/ReviewLens`; it shares the server with [LaunchScout](https://github.com/prasanth-sundararajan/launchscout) at `/techstack/launchscout/`, see [`sites.d/`](sites.d/README.md)). Hostinger **shared/web hosting cannot run Python apps** — use a **Hostinger VPS** (KVM plan, e.g. KVM 2) with Ubuntu.
 
 > **Fastest: one command from your Windows laptop.** With a Hostinger API token (hPanel → Account → API), this takes a snapshot, adds your SSH key, points DNS at the VPS and installs everything — no hPanel clicks:
 >

@@ -24,6 +24,7 @@ services:
       - APP_PATH=${APP_PATH:-techstack}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./sites.d:/etc/caddy/sites.d:ro   # route files of other apps on this server
       - caddy_data:/data
       - caddy_config:/config
 
