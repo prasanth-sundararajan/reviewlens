@@ -12,6 +12,7 @@ Manual run:
     python -m reviewlens.emailer --dry-run      # print what would be sent
     python -m reviewlens.emailer                # send now (skips if already sent)
     python -m reviewlens.emailer --force        # send again
+    python -m reviewlens.emailer --test         # send a [TEST] email to check SMTP settings
 """
 from __future__ import annotations
 
@@ -124,6 +125,34 @@ def send_message(msg: EmailMessage, settings: SMTPSettings) -> None:
             smtp.send_message(msg)
 
 
+def send_test_email() -> str:
+    """Send a clearly marked test email (latest saved report if any). Does not count as the weekly send."""
+    settings = SMTPSettings.from_env()
+    missing = settings.missing()
+    if missing:
+        return f"Not sent: missing settings {', '.join(missing)}."
+    weeks = list_weeks()
+    msg = build_message(weeks[0] if weeks else None, settings, os.getenv("APP_URL", ""))
+    if not weeks:
+        body = ("This is a test email from ReviewLens. Email delivery works.
+
+"
+                "Every Monday at 09:00 (IST) this address will receive the latest weekly customer-feedback "
+                "report, with the full enriched table attached. Save a week with 'Save as this week's "
+                "official report' in the app to include it.")
+        msg = EmailMessage()
+        msg["From"], msg["To"] = settings.sender, ", ".join(settings.recipients)
+        msg.set_content(body + (f"
+
+Open ReviewLens: {os.getenv('APP_URL')}" if os.getenv("APP_URL") else ""))
+        msg["Subject"] = "ReviewLens weekly report"
+    subject = msg["Subject"]
+    del msg["Subject"]
+    msg["Subject"] = f"[TEST] {subject}"
+    send_message(msg, settings)
+    return f"Sent '{msg['Subject']}' to {len(settings.recipients)} recipient(s)."
+
+
 def send_weekly_report(force: bool = False, dry_run: bool = False) -> str:
     """Send this week's email. Returns a one-line status message."""
     settings = SMTPSettings.from_env()
@@ -148,8 +177,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Email the ReviewLens weekly report.")
     parser.add_argument("--force", action="store_true", help="send even if this week was already emailed")
     parser.add_argument("--dry-run", action="store_true", help="show what would be sent, send nothing")
+    parser.add_argument("--test", action="store_true", help="send a [TEST] email now (not counted as weekly send)")
     args = parser.parse_args()
-    print(send_weekly_report(force=args.force, dry_run=args.dry_run))
+    print(send_test_email() if args.test else send_weekly_report(force=args.force, dry_run=args.dry_run))
 
 
 if __name__ == "__main__":

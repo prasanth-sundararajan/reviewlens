@@ -110,3 +110,16 @@ def test_scheduler_next_monday():
     assert next_run(mon_early, 0, 9, 0) == datetime(2026, 11, 23, 9, 0, tzinfo=ist)
     mon_late = datetime(2026, 11, 23, 9, 0, tzinfo=ist)
     assert next_run(mon_late, 0, 9, 0) == datetime(2026, 11, 30, 9, 0, tzinfo=ist)
+
+
+def test_test_email_is_marked_and_not_counted(monkeypatch):
+    _configure_smtp(monkeypatch)
+    sent = []
+    monkeypatch.setattr(emailer, "send_message", lambda msg, settings: sent.append(msg))
+    assert emailer.send_test_email().startswith("Sent")
+    assert sent[0]["Subject"].startswith("[TEST]")
+    e40, s40 = _week("reviews_week40.csv")
+    saved = history.save_week(e40, "R", s40.date_from, s40.date_to)
+    emailer.send_test_email()
+    assert sent[1]["Subject"].startswith("[TEST] ReviewLens weekly report |")
+    assert not emailer.already_sent(saved)
