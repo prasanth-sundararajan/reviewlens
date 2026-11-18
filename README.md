@@ -21,8 +21,12 @@ Turn hundreds of raw customer reviews (English, Tamil and Tanglish) from Google,
 | API key from `.env`, never hard-coded | `python-dotenv`; provider SDKs read the key from the environment |
 | Swap models without changing the chain | `LLM_PROVIDER=openai \| gemini \| anthropic \| mock` in `.env` |
 
-**Stretch goals done:** week-over-week trend arrows (upload last week's enriched CSV), replies in the same language as the review (sidebar toggle).
-Not done: automatic Monday email.
+**Stretch goals (all done):**
+- **Week-over-week trend arrows** - click *Save as this week's official report*; next week's upload compares automatically (▲ ▼ ▶ in the Trend tab and a *VS LAST WEEK* section in the report). You can also upload last week's enriched CSV.
+- **Replies in the same language as the review** - sidebar toggle; Tamil → Tamil script, Tanglish → Tanglish, English → English (summaries stay in English).
+- **Weekly report emailed every Monday** - a `scheduler` container emails the latest saved report (CSV attached) every Monday 09:00 IST via SMTP; sends a reminder if nothing was saved. Configure `SMTP_*` and `REPORT_RECIPIENTS` in `.env`; test with `python -m reviewlens.emailer --dry-run`.
+
+**Cost guard:** at most `MAX_REVIEWS` (default 500) reviews per upload.
 
 ## Quick start
 
@@ -78,6 +82,9 @@ reviewlens/
   aggregate.py  Step 04: counts, percentages, top complaints/praise, week-over-week trend
   report.py     Step 05: map-reduce report chain + plain-text renderer (numbers from pandas)
   export.py     Step 06: Excel-friendly CSV
+  history.py    Saved official weeks (trend arrows + email source)
+  emailer.py    Builds and sends the weekly report email (SMTP)
+  scheduler.py  Runs the email every Monday (own container)
   mock.py       Offline stand-in chains with the same contracts (demo + tests)
 app.py          Streamlit UI
 scripts/make_sample_data.py   Generates data/reviews_week40.csv and reviews_week39.csv

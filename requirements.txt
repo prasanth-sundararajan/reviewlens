@@ -8,4 +8,5 @@ langchain-openai>=0.2
 # Optional - install the one you use:
 # langchain-google-genai>=2.0   # LLM_PROVIDER=gemini
 # langchain-anthropic>=0.3      # LLM_PROVIDER=anthropic
+tzdata>=2024.1
 pytest>=8.0

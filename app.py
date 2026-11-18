@@ -17,10 +17,11 @@ import streamlit as st
 from reviewlens.aggregate import compare_weeks, compute_stats
 from reviewlens.classify import analyse_reviews, build_review_chain
 from reviewlens.export import to_excel_csv
+from reviewlens.history import list_weeks, previous_week, save_week
 from reviewlens.llm import get_model_name, get_provider, is_mock
 from reviewlens.report import generate_insights, render_report
 from reviewlens.schema import CATEGORIES, CATEGORY_LABELS, NEEDS_REVIEW, SENTIMENTS, URGENCIES
-from reviewlens.validate import CSVValidationError, load_reviews
+from reviewlens.validate import CSVValidationError, load_reviews, max_reviews
 
 st.set_page_config(page_title="ReviewLens", page_icon="🔎", layout="wide")
 
@@ -61,13 +62,14 @@ with st.sidebar:
                                 help="Lower this if you hit rate limits.")
     reply_lang = st.radio("Suggested reply language", ["English", "Same as review"], index=0)
     st.divider()
-    prev_file = st.file_uploader("Optional: last week's enriched CSV (for trends)", type="csv", key="prev")
+    prev_file = st.file_uploader("Optional: last week's enriched CSV (for trends)", type="csv", key="prev",
+                                 help="Not needed if last week was saved as an official report - it is used automatically.")
 
 st.title("ReviewLens: Customer Feedback Analyzer")
 st.write("Upload this week's reviews (`review_id, date, platform, rating, review_text`). "
          "Every review is tagged by an LLM; counts are calculated with pandas.")
 
-uploaded = st.file_uploader("Reviews CSV", type="csv")
+uploaded = st.file_uploader(f"Reviews CSV (up to {max_reviews()} reviews per upload)", type="csv")
 if uploaded is None:
     st.info("No file yet? Download the sample week below, then upload it above.")
     sample = Path(__file__).parent / "data" / "reviews_week40.csv"
@@ -119,11 +121,28 @@ if "enriched" not in st.session_state:
 enriched: pd.DataFrame = st.session_state.enriched
 stats = compute_stats(enriched)
 
+# ---------------------------------------------------------------- last week (for trend arrows)
+prev_stats, prev_label = None, ""
+if prev_file is not None:
+    prev_df = pd.read_csv(prev_file, dtype=str, keep_default_na=False, encoding="utf-8-sig")
+    if {"sentiment", "category", "urgency", "language", "platform", "date"}.issubset(prev_df.columns):
+        prev_stats, prev_label = compute_stats(prev_df), f"uploaded file {prev_file.name}"
+    else:
+        st.sidebar.error("That file is not an enriched ReviewLens export.")
+if prev_stats is None and stats.date_to:
+    saved_prev = previous_week(stats.date_to)
+    if saved_prev is not None:
+        prev_stats, prev_label = compute_stats(saved_prev.load_enriched()), f"saved week ending {saved_prev.week_end}"
+
+if st.session_state.get("prev_label") != prev_label:
+    st.session_state.prev_label = prev_label
+    st.session_state.pop("report", None)
+
 if "report" not in st.session_state:
     with st.spinner("Writing weekly insights report…"):
         try:
             insights = generate_insights(enriched, stats)
-            st.session_state.report = render_report(stats, insights)
+            st.session_state.report = render_report(stats, insights, prev_stats)
         except Exception as exc:  # noqa: BLE001
             st.session_state.report = f"Report could not be generated: {exc}"
 
@@ -202,16 +221,34 @@ with tab_report:
         st.session_state.pop("report", None)
         st.rerun()
 
+    st.divider()
+    st.subheader("Official weekly report")
+    st.caption(f"Saving keeps this week's results on the server for next week's trend arrows "
+               f"and for the automatic Monday email. Week: {stats.date_from} to {stats.date_to}.")
+    if st.button("💾 Save as this week's official report"):
+        try:
+            saved = save_week(enriched, st.session_state.report, stats.date_from, stats.date_to)
+            st.success(f"Saved as the official report for the week ending {saved.week_end}.")
+        except OSError as exc:
+            st.error(f"Could not save: {exc}")
+    weeks = list_weeks()
+    if weeks:
+        st.caption("Saved weeks: " + ", ".join(w.week_end for w in weeks[:8]))
+
 with tab_trend:
-    if prev_file is None:
-        st.info("Upload last week's **enriched** CSV (the file you downloaded from ReviewLens) in the sidebar "
-                "to see week-over-week trend arrows.")
+    if prev_stats is None:
+        st.info("No previous week to compare with yet. Save each week as the official report (Weekly report tab) "
+                "and next week's upload shows trend arrows automatically - or upload last week's enriched CSV "
+                "in the sidebar.")
     else:
-        prev = pd.read_csv(prev_file, dtype=str, keep_default_na=False, encoding="utf-8-sig")
-        needed = {"sentiment", "category", "urgency", "language", "platform", "date"}
-        if not needed.issubset(prev.columns):
-            st.error("That file is not an enriched ReviewLens export (missing sentiment/category/urgency columns).")
-        else:
-            trend = compare_weeks(stats, compute_stats(prev))
-            st.dataframe(trend, use_container_width=True, hide_index=True)
-            st.caption("▲ went up, ▼ went down. For complaints and urgency, ▼ is good news.")
+        st.write(f"Compared with **{prev_label}**")
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("Total reviews", stats.total, stats.total - prev_stats.total)
+        m2.metric("Positive %", f"{stats.sentiment_pct['positive']}%",
+                  f"{stats.sentiment_pct['positive'] - prev_stats.sentiment_pct['positive']} pts")
+        m3.metric("Negative %", f"{stats.sentiment_pct['negative']}%",
+                  f"{stats.sentiment_pct['negative'] - prev_stats.sentiment_pct['negative']} pts", delta_color="inverse")
+        m4.metric("HIGH urgency", stats.high_urgency, stats.high_urgency - prev_stats.high_urgency,
+                  delta_color="inverse")
+        st.dataframe(compare_weeks(stats, prev_stats), use_container_width=True, hide_index=True)
+        st.caption("▲ went up, ▼ went down. For complaints and urgency, ▼ is good news.")

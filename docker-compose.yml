@@ -1,14 +1,31 @@
-# Deploy: git clone the repo, create .env (see .env.example + APP_PASSWORD), then `docker compose up -d --build`.
-# Secrets (OPENAI_API_KEY, APP_PASSWORD) come from the project environment, never from this file.
+# Deploy: git clone the repo, create .env (see .env.example), then `docker compose up -d --build`.
+# Secrets come from .env on the host, never from this file.
+x-app: &app
+  build: .
+  image: reviewlens:latest
+  restart: unless-stopped
+  env_file:
+    - path: .env
+      required: false
+  environment:
+    - LLM_PROVIDER=${LLM_PROVIDER:-openai}
+    - LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
+    - HISTORY_DIR=/app/history
+  volumes:
+    - history:/app/history
+
 services:
   reviewlens:
-    build: .
-    image: reviewlens:latest
-    restart: unless-stopped
+    <<: *app
     ports:
       - "8501:8501"
-    environment:
-      - LLM_PROVIDER=${LLM_PROVIDER:-openai}
-      - LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - APP_PASSWORD=${APP_PASSWORD:-}
+
+  # Emails the latest saved weekly report every Monday (REPORT_DAY / REPORT_TIME / REPORT_TIMEZONE).
+  scheduler:
+    <<: *app
+    command: ["python", "-m", "reviewlens.scheduler"]
+    healthcheck:
+      disable: true
+
+volumes:
+  history:

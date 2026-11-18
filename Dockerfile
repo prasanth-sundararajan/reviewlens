@@ -4,7 +4,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
-RUN useradd -m appuser && chown -R appuser /app
+RUN useradd -m appuser && mkdir -p /app/history && chown -R appuser /app
 USER appuser
 EXPOSE 8501
 HEALTHCHECK CMD python -c "import os,urllib.request;p=os.environ.get('STREAMLIT_SERVER_BASE_URL_PATH','').strip('/');urllib.request.urlopen('http://localhost:8501/'+(p+'/' if p else '')+'_stcore/health')"

@@ -129,8 +129,8 @@ def _fmt_date(value: str) -> str:
         return value or "?"
 
 
-def render_report(stats: WeeklyStats, insights: WeeklyInsights) -> str:
-    """Plain-text report. Numbers from ``stats`` only."""
+def render_report(stats: WeeklyStats, insights: WeeklyInsights, previous: WeeklyStats | None = None) -> str:
+    """Plain-text report. Numbers from ``stats`` only (and ``previous`` for trend arrows)."""
     headlines = {t.category: t.headline.strip() for t in insights.complaint_themes}
     pct = stats.sentiment_pct
     width = 34
@@ -158,4 +158,31 @@ def render_report(stats: WeeklyStats, insights: WeeklyInsights) -> str:
 
     lines += ["", f"URGENT: {stats.high_urgency} review(s) need a reply within 24 hours", "", "ACTION ITEMS"]
     lines += [f" {i}. {a}" for i, a in enumerate(insights.action_items, 1)]
+
+    if previous is not None:
+        lines += ["", f"VS LAST WEEK  (week ending {_fmt_date(previous.date_to)})"]
+        lines += [" " + trend_line(label, before, now) for label, before, now in _trend_rows(stats, previous)]
     return "\n".join(lines)
+
+
+def trend_arrow(before: int, now: int) -> str:
+    return "▲" if now > before else "▼" if now < before else "▶"
+
+
+def trend_line(label: str, before: int, now: int, unit: str = "") -> str:
+    diff = now - before
+    sign = "+" if diff > 0 else ""
+    return f"{trend_arrow(before, now)} {label}: {now}{unit} (last week {before}{unit}, {sign}{diff})"
+
+
+def _trend_rows(cur: WeeklyStats, prev: WeeklyStats) -> list[tuple[str, int, int]]:
+    rows = [
+        ("Total reviews", prev.total, cur.total),
+        ("Positive %", prev.sentiment_pct["positive"], cur.sentiment_pct["positive"]),
+        ("Negative %", prev.sentiment_pct["negative"], cur.sentiment_pct["negative"]),
+        ("HIGH urgency", prev.high_urgency, cur.high_urgency),
+    ]
+    for c in cur.top_complaints:
+        rows.append((f"{CATEGORY_LABELS[c.category]} complaints",
+                     prev.negative_by_category.get(c.category, 0), c.count))
+    return rows

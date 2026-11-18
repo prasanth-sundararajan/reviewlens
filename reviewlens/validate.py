@@ -1,12 +1,21 @@
 """Step 02: validate and clean the uploaded CSV."""
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from typing import IO
 
 import pandas as pd
 
 REQUIRED_COLUMNS = ["review_id", "date", "platform", "rating", "review_text"]
+
+
+def max_reviews() -> int:
+    """Upper limit of reviews per upload (MAX_REVIEWS env, default 500). Caps cost per run."""
+    try:
+        return max(1, int(os.getenv("MAX_REVIEWS", "500")))
+    except ValueError:
+        return 500
 
 
 @dataclass
@@ -80,5 +89,12 @@ def validate_reviews(raw: pd.DataFrame) -> ValidationResult:
 
     if df.empty:
         raise CSVValidationError("No usable reviews found after cleaning.")
+
+    limit = max_reviews()
+    if len(df) > limit:
+        raise CSVValidationError(
+            f"This file has {len(df)} reviews, but the limit is {limit} per upload. "
+            f"Please split it into smaller files (for example one file per week)."
+        )
 
     return ValidationResult(df=df.reset_index(drop=True), warnings=warnings)
