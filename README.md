@@ -56,7 +56,7 @@ docker compose up -d --build          # local: http://localhost:8501
 ```
 
 Production with HTTPS (Caddy + Let's Encrypt). Point a DNS A record at the server, then in `.env` set
-`OPENAI_API_KEY`, `APP_PASSWORD` (login gate) and `APP_DOMAIN` (e.g. `techstack.example.com`):
+`OPENAI_API_KEY`, `APP_PASSWORD` (login gate) and `APP_DOMAIN` (e.g. `www.example.com`; comma-separated for several) and optionally `APP_PATH` (default `techstack`, so the app is at `https://www.example.com/techstack/`):
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build

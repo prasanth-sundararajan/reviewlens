@@ -1,5 +1,13 @@
-# HTTPS reverse proxy for production. Caddy fetches and renews the Let's Encrypt certificate itself.
+# HTTPS reverse proxy for production. Caddy fetches and renews Let's Encrypt certificates itself.
+# APP_DOMAIN may be a comma-separated list, e.g. "www.example.com, techstack.example.com".
+# The app is served under /{$APP_PATH}/ ; any other path redirects there.
 {$APP_DOMAIN} {
 	encode gzip
-	reverse_proxy reviewlens:8501
+	@app path /{$APP_PATH} /{$APP_PATH}/*
+	handle @app {
+		reverse_proxy reviewlens:8501
+	}
+	handle {
+		redir /{$APP_PATH}/ 302
+	}
 }
