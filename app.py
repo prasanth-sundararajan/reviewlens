@@ -8,6 +8,7 @@ import hashlib
 import hmac
 import os
 import time
+from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
@@ -68,7 +69,11 @@ st.write("Upload this week's reviews (`review_id, date, platform, rating, review
 
 uploaded = st.file_uploader("Reviews CSV", type="csv")
 if uploaded is None:
-    st.info("No file yet? Try `data/reviews_week40.csv` from the repo.")
+    st.info("No file yet? Download the sample week below, then upload it above.")
+    sample = Path(__file__).parent / "data" / "reviews_week40.csv"
+    if sample.exists():
+        st.download_button("⬇️ Download sample reviews_week40.csv", sample.read_bytes(),
+                           file_name="reviews_week40.csv", mime="text/csv")
     st.stop()
 
 # ---------------------------------------------------------------- validate

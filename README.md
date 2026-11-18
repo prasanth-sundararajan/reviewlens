@@ -37,6 +37,8 @@ streamlit run app.py
 
 Upload `data/reviews_week40.csv` (248 reviews + a few dirty rows) and press **Analyse**.
 
+📥 **Sample data:** [download reviews_week40.csv](https://github.com/prasanth-sundararajan/reviewlens/releases/download/v1.0/reviews_week40.csv) (also in [`data/`](data/reviews_week40.csv) and on the [v1.0 release](https://github.com/prasanth-sundararajan/reviewlens/releases/tag/v1.0); the live app has a download button too).
+
 No API key yet? Set `LLM_PROVIDER=mock` in `.env` to try the full app offline (keyword-based results, same pipeline).
 
 ### Using Gemini or Claude instead of OpenAI
