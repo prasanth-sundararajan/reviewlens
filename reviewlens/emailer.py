@@ -134,17 +134,14 @@ def send_test_email() -> str:
     weeks = list_weeks()
     msg = build_message(weeks[0] if weeks else None, settings, os.getenv("APP_URL", ""))
     if not weeks:
-        body = ("This is a test email from ReviewLens. Email delivery works.
-
-"
+        body = ("This is a test email from ReviewLens. Email delivery works.\n\n"
                 "Every Monday at 09:00 (IST) this address will receive the latest weekly customer-feedback "
                 "report, with the full enriched table attached. Save a week with 'Save as this week's "
                 "official report' in the app to include it.")
         msg = EmailMessage()
         msg["From"], msg["To"] = settings.sender, ", ".join(settings.recipients)
-        msg.set_content(body + (f"
-
-Open ReviewLens: {os.getenv('APP_URL')}" if os.getenv("APP_URL") else ""))
+        app_url = os.getenv("APP_URL", "")
+        msg.set_content(body + (f"\n\nOpen ReviewLens: {app_url}" if app_url else ""))
         msg["Subject"] = "ReviewLens weekly report"
     subject = msg["Subject"]
     del msg["Subject"]
