@@ -118,7 +118,7 @@ This is how the live app at `https://www.kowsalyagroups.com/techstack/ReviewLens
 >
 > ```powershell
 > $env:HOSTINGER_API_TOKEN = "<your token>"
-> .\scripts\hostinger_setup.ps1 -Domain yourdomain.com          # app at https://www.yourdomain.com/techstack/
+> .\scripts\hostinger_setup.ps1 -Domain yourdomain.com          # app at https://www.yourdomain.com/techstack/ReviewLens/
 > .\scripts\hostinger_setup.ps1 -Domain yourdomain.com -DryRun  # preview first, changes nothing
 > ```
 >
@@ -170,11 +170,11 @@ chmod 600 .env             # only root can read the secrets
 |---|---|---|
 | `OPENAI_API_KEY` | `sk-...` | Required |
 | `APP_DOMAIN` | `www.yourdomain.com` | Must match the DNS A record |
-| `APP_PATH` | `techstack` | App is served at `https://www.yourdomain.com/techstack/` |
+| `APP_PATH` | `techstack/ReviewLens` | App is served at `https://www.yourdomain.com/techstack/ReviewLens/` |
 | `MAX_REVIEWS` | `500` | Cost guard per upload |
 | `APP_PASSWORD` | *(empty)* | Set a value to require a login; leave empty for public access |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `REPORT_RECIPIENTS` | `smtp.gmail.com`, `587`, … | Optional — Monday email (see below) |
-| `APP_URL` | `https://www.yourdomain.com/techstack/` | Link inside the email |
+| `APP_URL` | `https://www.yourdomain.com/techstack/ReviewLens/` | Link inside the email |
 
 **6. Start it with HTTPS**
 
@@ -184,7 +184,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml ps        # cadd
 docker compose -f docker-compose.yml -f docker-compose.prod.yml logs caddy | grep "certificate obtained"
 ```
 
-Caddy gets a free **Let's Encrypt** certificate automatically (ports 80/443 must be free). Open `https://www.yourdomain.com/techstack/` — plain `http://` and `/` redirect there, and port 8501 is not exposed to the internet.
+Caddy gets a free **Let's Encrypt** certificate automatically (ports 80/443 must be free). Open `https://www.yourdomain.com/techstack/ReviewLens/` — plain `http://` and `/` redirect there, and port 8501 is not exposed to the internet.
 
 **7. (Optional) Test the weekly email**
 
@@ -267,9 +267,9 @@ LLM_MODEL=gpt-4o-mini
 OPENAI_API_KEY=$KEY
 MAX_REVIEWS=500
 APP_DOMAIN=www.yourdomain.com
-APP_PATH=techstack
+APP_PATH=techstack/ReviewLens
 APP_PASSWORD=
-APP_URL=https://www.yourdomain.com/techstack/
+APP_URL=https://www.yourdomain.com/techstack/ReviewLens/
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=
@@ -284,9 +284,9 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 
 ```powershell
 $d = "www.yourdomain.com"
-curl.exe -s -o NUL -w "health %{http_code}`n" "https://$d/techstack/_stcore/health"              # 200
-curl.exe -s -o NUL -w "http   %{http_code} -> %{redirect_url}`n" "http://$d/techstack/"           # 308 -> https
-curl.exe -s -o NUL -w "root   %{http_code} -> %{redirect_url}`n" "https://$d/"                    # 302 -> /techstack/
+curl.exe -s -o NUL -w "health %{http_code}`n" "https://$d/techstack/ReviewLens/_stcore/health"              # 200
+curl.exe -s -o NUL -w "http   %{http_code} -> %{redirect_url}`n" "http://$d/techstack/ReviewLens/"           # 308 -> https
+curl.exe -s -o NUL -w "root   %{http_code} -> %{redirect_url}`n" "https://$d/"                    # 302 -> /techstack/ReviewLens/
 $t = New-Object Net.Sockets.TcpClient($d, 443); $s = New-Object Net.Security.SslStream($t.GetStream()); $s.AuthenticateAsClient($d); "certificate until " + $s.RemoteCertificate.GetExpirationDateString(); $t.Close()
 ```
 

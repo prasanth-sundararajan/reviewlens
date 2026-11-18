@@ -25,7 +25,7 @@
 param(
   [Parameter(Mandatory = $true)][string]$Domain,          # e.g. example.com (as listed in hPanel, no www)
   [string]$Subdomain = "www",                              # app URL = https://<Subdomain>.<Domain>/<AppPath>/
-  [string]$AppPath = "techstack",
+  [string]$AppPath = "techstack/ReviewLens",
   [long]$VmId = 0,                                         # 0 = pick the only VPS (or ask)
   [string]$KeyPath = "$HOME\.ssh\reviewlens_vps",
   [string]$Repo = "https://github.com/prasanth-sundararajan/reviewlens",

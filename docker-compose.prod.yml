@@ -8,7 +8,7 @@ services:
     expose:
       - "8501"
     environment:
-      - STREAMLIT_SERVER_BASE_URL_PATH=${APP_PATH:-techstack}
+      - STREAMLIT_SERVER_BASE_URL_PATH=${APP_PATH:-techstack/ReviewLens}
 
   caddy:
     image: caddy:2.10-alpine
@@ -21,7 +21,7 @@ services:
       - "443:443/udp"
     environment:
       - APP_DOMAIN=${APP_DOMAIN:?set APP_DOMAIN in .env}
-      - APP_PATH=${APP_PATH:-techstack}
+      - APP_PATH=${APP_PATH:-techstack/ReviewLens}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./sites.d:/etc/caddy/sites.d:ro   # route files of other apps on this server

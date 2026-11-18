@@ -13,7 +13,7 @@
 #
 # Options (environment variables):
 #   APP_DIR=/opt/reviewlens  REPO=https://github.com/<you>/reviewlens.git  BRANCH=main
-#   APP_DOMAIN, APP_PATH (default techstack), OPENAI_API_KEY, LLM_MODEL (default gpt-4o-mini),
+#   APP_DOMAIN, APP_PATH (default techstack/ReviewLens), OPENAI_API_KEY, LLM_MODEL (default gpt-4o-mini),
 #   MAX_REVIEWS (default 500), APP_PASSWORD (empty = public),
 #   SMTP_USER, SMTP_PASSWORD, REPORT_RECIPIENTS (optional weekly email)
 #   NO_START=1  - install + configure only, do not start containers
@@ -67,7 +67,7 @@ if [ -f .env ]; then
 else
   ask APP_DOMAIN "Domain for the app (DNS A record must point here), e.g. www.example.com"
   [ -n "${APP_DOMAIN:-}" ] || die "APP_DOMAIN is required."
-  ask APP_PATH "URL path" "techstack"
+  ask APP_PATH "URL path" "techstack/ReviewLens"
   ask OPENAI_API_KEY "OpenAI API key (input hidden)" "" secret
   [ -n "${OPENAI_API_KEY:-}" ] || die "OPENAI_API_KEY is required."
   ask APP_PASSWORD "Login password for the app (empty = public)" ""
@@ -83,9 +83,9 @@ LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
 OPENAI_API_KEY=${OPENAI_API_KEY}
 MAX_REVIEWS=${MAX_REVIEWS:-500}
 APP_DOMAIN=${APP_DOMAIN}
-APP_PATH=${APP_PATH:-techstack}
+APP_PATH=${APP_PATH:-techstack/ReviewLens}
 APP_PASSWORD=${APP_PASSWORD:-}
-APP_URL=https://${APP_DOMAIN}/${APP_PATH:-techstack}/
+APP_URL=https://${APP_DOMAIN}/${APP_PATH:-techstack/ReviewLens}/
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=${SMTP_USER:-}
@@ -99,7 +99,7 @@ EOF
 fi
 chmod 600 .env
 DOMAIN="$(grep -E '^APP_DOMAIN=' .env | cut -d= -f2- | cut -d, -f1 | tr -d ' ')"
-APATH="$(grep -E '^APP_PATH=' .env | cut -d= -f2- | tr -d ' ')"; APATH="${APATH:-techstack}"
+APATH="$(grep -E '^APP_PATH=' .env | cut -d= -f2- | tr -d ' ')"; APATH="${APATH:-techstack/ReviewLens}"
 [ -n "$DOMAIN" ] || die "APP_DOMAIN is missing in .env"
 ok "domain: $DOMAIN  path: /$APATH/"
 

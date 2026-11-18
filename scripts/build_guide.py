@@ -392,7 +392,7 @@ REPORT_RECIPIENTS=manager@example.com, owner@example.com
 REPORT_DAY=monday
 REPORT_TIME=09:00
 REPORT_TIMEZONE=Asia/Kolkata
-APP_URL=https://www.example.com/techstack/
+APP_URL=https://www.example.com/techstack/ReviewLens/
 """),
           p("Create the App Password at <b>myaccount.google.com/apppasswords</b> (2-Step Verification must be on). "
             "Check the setup without waiting for Monday:"),
@@ -442,12 +442,12 @@ systemctl enable --now docker
 git clone https://github.com/<you>/reviewlens.git /opt/reviewlens
 cd /opt/reviewlens
 nano .env            # OPENAI_API_KEY, SMTP_*, REPORT_RECIPIENTS, plus:
-                     # APP_DOMAIN=www.example.com   APP_PATH=techstack
+                     # APP_DOMAIN=www.example.com   APP_PATH=techstack/ReviewLens
 chmod 600 .env
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 """),
           p("<b>docker-compose.prod.yml</b> adds <b>Caddy</b>, which gets and renews the Let's Encrypt certificate by "
-            "itself, serves the app at <b>https://www.example.com/techstack/</b>, redirects everything else there "
+            "itself, serves the app at <b>https://www.example.com/techstack/ReviewLens/</b>, redirects everything else there "
             "and hides port 8501 from the internet. Streamlit is told its sub-path with "
             "STREAMLIT_SERVER_BASE_URL_PATH."),
           h2("d) Update after a change"),
@@ -492,11 +492,11 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml ps
           table([["Setting in the server .env", "Example / note"],
                  ["OPENAI_API_KEY", "sk-...  (required)"],
                  ["APP_DOMAIN", "www.yourdomain.com - must match the DNS A record"],
-                 ["APP_PATH", "techstack -> app at https://www.yourdomain.com/techstack/"],
+                 ["APP_PATH", "techstack/ReviewLens -> app at https://www.yourdomain.com/techstack/ReviewLens/"],
                  ["MAX_REVIEWS", "500 - cost guard per upload"],
                  ["APP_PASSWORD", "empty = public; set a value to require a login"],
                  ["SMTP_HOST / PORT / USER / PASSWORD, REPORT_RECIPIENTS", "Optional Monday email (Gmail App Password)"],
-                 ["APP_URL", "https://www.yourdomain.com/techstack/ - link in the email"]],
+                 ["APP_URL", "https://www.yourdomain.com/techstack/ReviewLens/ - link in the email"]],
                 [75, 95]),
           KeepTogether([h2("Steps 7-8 - Test the email and update later"), code(r"""
 docker compose -f docker-compose.yml -f docker-compose.prod.yml exec scheduler \
@@ -566,8 +566,8 @@ LLM_PROVIDER=openai
 OPENAI_API_KEY=$KEY
 MAX_REVIEWS=500
 APP_DOMAIN=www.yourdomain.com
-APP_PATH=techstack
-APP_URL=https://www.yourdomain.com/techstack/
+APP_PATH=techstack/ReviewLens
+APP_URL=https://www.yourdomain.com/techstack/ReviewLens/
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=
@@ -579,8 +579,8 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 """)]),
           KeepTogether([h2("F. Laptop: check it is live"), code(r"""
 $d = "www.yourdomain.com"
-curl.exe -s -o NUL -w "health %{http_code}`n" "https://$d/techstack/_stcore/health"     # 200
-curl.exe -s -o NUL -w "http %{http_code} -> %{redirect_url}`n" "http://$d/techstack/"  # 308
+curl.exe -s -o NUL -w "health %{http_code}`n" "https://$d/techstack/ReviewLens/_stcore/health"     # 200
+curl.exe -s -o NUL -w "http %{http_code} -> %{redirect_url}`n" "http://$d/techstack/ReviewLens/"  # 308
 curl.exe -s -o NUL -w "root %{http_code} -> %{redirect_url}`n" "https://$d/"           # 302
 $t = New-Object Net.Sockets.TcpClient($d, 443)
 $s = New-Object Net.Security.SslStream($t.GetStream()); $s.AuthenticateAsClient($d)
