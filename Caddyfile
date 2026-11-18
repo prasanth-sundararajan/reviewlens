@@ -10,6 +10,10 @@
 	redir /{$APP_PATH} /{$APP_PATH}/ 308
 	@app path /{$APP_PATH}/*
 	handle @app {
+		# Caddy matches paths case-insensitively but Streamlit does not: send other
+		# spellings (e.g. /techstack/reviewlens/) to the exact path.
+		@app_other_case not path_regexp ^/{$APP_PATH}/
+		redir @app_other_case /{$APP_PATH}/ 302
 		reverse_proxy reviewlens:8501
 	}
 	handle {
