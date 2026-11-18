@@ -20,10 +20,12 @@ from reviewlens.export import to_excel_csv
 from reviewlens.history import list_weeks, previous_week, save_week
 from reviewlens.llm import get_model_name, get_provider, is_mock
 from reviewlens.report import generate_insights, render_report
+from reviewlens import theme
 from reviewlens.schema import CATEGORIES, CATEGORY_LABELS, NEEDS_REVIEW, SENTIMENTS, URGENCIES
 from reviewlens.validate import CSVValidationError, load_reviews, max_reviews
 
 st.set_page_config(page_title="ReviewLens", page_icon="🔎", layout="wide")
+theme.inject_styles()
 
 
 def _require_password() -> None:
@@ -43,8 +45,8 @@ def _require_password() -> None:
 
 _require_password()
 
-SENTIMENT_COLORS = {"positive": "#2E9E5B", "neutral": "#9AA0A6", "negative": "#D64545", NEEDS_REVIEW: "#E0A800"}
-URGENCY_COLORS = {"high": "#D64545", "medium": "#E8912D", "low": "#4C8BF5", NEEDS_REVIEW: "#E0A800"}
+SENTIMENT_COLORS = theme.sentiment_colors(NEEDS_REVIEW)
+URGENCY_COLORS = theme.urgency_colors(NEEDS_REVIEW)
 
 # ---------------------------------------------------------------- sidebar
 with st.sidebar:
@@ -65,9 +67,7 @@ with st.sidebar:
     prev_file = st.file_uploader("Optional: last week's enriched CSV (for trends)", type="csv", key="prev",
                                  help="Not needed if last week was saved as an official report - it is used automatically.")
 
-st.title("ReviewLens: Customer Feedback Analyzer")
-st.write("Upload this week's reviews (`review_id, date, platform, rating, review_text`). "
-         "Every review is tagged by an LLM; counts are calculated with pandas.")
+theme.hero()
 
 uploaded = st.file_uploader(f"Reviews CSV (up to {max_reviews()} reviews per upload)", type="csv")
 if uploaded is None:
@@ -160,25 +160,25 @@ with tab_dash:
     c1, c2 = st.columns(2)
     sent_df = pd.DataFrame({"sentiment": list(stats.sentiment_counts), "reviews": list(stats.sentiment_counts.values())})
     c1.plotly_chart(
-        px.pie(sent_df, names="sentiment", values="reviews", hole=0.5, title="Sentiment split",
-               color="sentiment", color_discrete_map=SENTIMENT_COLORS),
+        theme.style_fig(px.pie(sent_df, names="sentiment", values="reviews", hole=0.5, title="Sentiment split",
+               color="sentiment", color_discrete_map=SENTIMENT_COLORS)),
         use_container_width=True,
     )
     ok = enriched[enriched["sentiment"] != NEEDS_REVIEW]
     cat_df = (ok.groupby(["category", "sentiment"]).size().reset_index(name="reviews"))
     cat_df["category"] = cat_df["category"].map(CATEGORY_LABELS)
     c2.plotly_chart(
-        px.bar(cat_df, x="reviews", y="category", color="sentiment", orientation="h", title="Reviews by category",
-               color_discrete_map=SENTIMENT_COLORS, category_orders={"sentiment": list(SENTIMENTS)}),
+        theme.style_fig(px.bar(cat_df, x="reviews", y="category", color="sentiment", orientation="h", title="Reviews by category",
+               color_discrete_map=SENTIMENT_COLORS, category_orders={"sentiment": list(SENTIMENTS)})),
         use_container_width=True,
     )
     c3, c4 = st.columns(2)
     urg_df = pd.DataFrame({"urgency": list(stats.urgency_counts), "reviews": list(stats.urgency_counts.values())})
-    c3.plotly_chart(px.bar(urg_df, x="urgency", y="reviews", title="Urgency", color="urgency",
-                           color_discrete_map=URGENCY_COLORS), use_container_width=True)
+    c3.plotly_chart(theme.style_fig(px.bar(urg_df, x="urgency", y="reviews", title="Urgency", color="urgency",
+                           color_discrete_map=URGENCY_COLORS)), use_container_width=True)
     plat_df = ok.groupby(["platform", "sentiment"]).size().reset_index(name="reviews")
-    c4.plotly_chart(px.bar(plat_df, x="platform", y="reviews", color="sentiment", title="By platform",
-                           color_discrete_map=SENTIMENT_COLORS), use_container_width=True)
+    c4.plotly_chart(theme.style_fig(px.bar(plat_df, x="platform", y="reviews", color="sentiment", title="By platform",
+                           color_discrete_map=SENTIMENT_COLORS)), use_container_width=True)
     st.caption("Languages detected: " + ", ".join(f"{k} {v}" for k, v in stats.language_counts.items()))
 
 with tab_reviews:

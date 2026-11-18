@@ -1,5 +1,23 @@
 [server]
 maxUploadSize = 50
 
+[browser]
+gatherUsageStats = false
+
+# ReviewLens design system: deep purple surfaces, pink accent.
+# Extra component styling and chart colours live in reviewlens/theme.py (same tokens).
 [theme]
-primaryColor = "#D64545"
+base = "dark"
+primaryColor = "#F472B6"              # pink: buttons, focus, sliders, active tab
+backgroundColor = "#140A26"           # plum-950: page
+secondaryBackgroundColor = "#241140"  # plum-850: inputs, uploader, expanders
+textColor = "#F5EEFF"
+linkColor = "#F9A8D4"
+borderColor = "#3B2463"
+showWidgetBorder = true
+baseRadius = "0.65rem"
+font = "sans-serif"
+
+[theme.sidebar]
+backgroundColor = "#1B0E33"           # plum-900
+secondaryBackgroundColor = "#2A1550"
