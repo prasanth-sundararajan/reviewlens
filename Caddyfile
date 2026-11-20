@@ -20,3 +20,8 @@
 		redir * /{$APP_PATH}/ 302
 	}
 }
+
+# Bare domain: redirect to www (added for SlotEase/portfolio security)
+kowsalyagroups.com {
+	redir https://www.kowsalyagroups.com{uri} 308
+}
