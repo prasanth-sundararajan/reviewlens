@@ -61,7 +61,7 @@ def test_invalid_output_is_retried_then_marked_needs_review():
         if rid == df.review_id[0] and calls[rid] == 1:
             out["category"] = "ambience"  # not in the allowed list -> retried, then OK
         if rid == df.review_id[1]:
-            out["urgency"] = "critical"  # always invalid -> needs_review
+            out["urgency"] = "catastrophic"  # always invalid -> needs_review
         return out
 
     enriched = analyse_reviews(df, RunnableLambda(flaky), max_retries=2)

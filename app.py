@@ -20,11 +20,13 @@ from reviewlens.export import to_excel_csv
 from reviewlens.history import list_weeks, previous_week, save_week
 from reviewlens.llm import get_model_name, get_provider, is_mock
 from reviewlens.report import generate_insights, render_report
+from reviewlens import guardrails as gr
 from reviewlens import run_limit, theme
 from reviewlens.schema import CATEGORIES, CATEGORY_LABELS, NEEDS_REVIEW, SENTIMENTS, URGENCIES
 from reviewlens.validate import CSVValidationError, load_reviews, max_reviews
 
 st.set_page_config(page_title="ReviewLens", page_icon="🔎", layout="wide")
+gr.install_log_redaction()
 theme.inject_styles()
 
 
@@ -79,7 +81,8 @@ with st.sidebar:
 
 theme.hero()
 
-uploaded = st.file_uploader(f"Reviews CSV (up to {max_reviews()} reviews per upload)", type="csv")
+uploaded = st.file_uploader(f"Reviews CSV (up to {max_reviews()} reviews, {gr.max_upload_bytes() // 1048576} MB)",
+                            type="csv")
 if uploaded is None:
     st.info("No file yet? Download the sample week below, then upload it above.")
     sample = Path(__file__).parent / "data" / "reviews_week40.csv"
@@ -90,7 +93,11 @@ if uploaded is None:
 
 # ---------------------------------------------------------------- validate
 try:
+    gr.check_upload(uploaded.name, uploaded.size)
     validation = load_reviews(uploaded)
+except gr.GuardrailError as exc:
+    st.error(f"Upload not accepted: {exc}")
+    st.stop()
 except CSVValidationError as exc:
     st.error(f"CSV problem: {exc}")
     st.stop()
@@ -112,8 +119,14 @@ if "enriched" not in st.session_state:
     if limit_hit:
         st.warning(f"**Daily limit reached.** All {run_limit.limit_per_day()} analyses for today have been used. "
                    "New analyses open again at midnight (India time).")
-    if not st.button(f"Analyse {len(reviews)} reviews", type="primary", disabled=limit_hit):
+    session_ok, wait_s, recent = gr.check_session_rate(st.session_state.get("run_times", []))
+    st.session_state.run_times = recent
+    if not session_ok:
+        st.warning(f"**Slow down a little.** This session has used its {gr.max_runs_per_session_hour()} analyses "
+                   f"for the hour. Please try again in about {max(1, wait_s // 60)} minute(s).")
+    if not st.button(f"Analyse {len(reviews)} reviews", type="primary", disabled=limit_hit or not session_ok):
         st.stop()
+    st.session_state.run_times = recent + [time.time()]
     if not is_mock(provider):
         try:
             run_limit.start_run(len(reviews))
@@ -132,7 +145,7 @@ if "enriched" not in st.session_state:
             progress=lambda done, total: bar.progress(done / total, text=f"Classified {done}/{total} reviews"),
         )
     except Exception as exc:  # noqa: BLE001 - surface config/API errors to the user
-        st.error(f"Analysis failed: {exc}")
+        st.error(f"Analysis failed: {gr.safe_error(exc)}")
         st.stop()
     bar.progress(1.0, text=f"Done in {time.time() - started:.0f}s")
     st.session_state.enriched = enriched
@@ -141,10 +154,25 @@ if "enriched" not in st.session_state:
 enriched: pd.DataFrame = st.session_state.enriched
 stats = compute_stats(enriched)
 
+if "guardrails" in enriched.columns:
+    flags = enriched["guardrails"].fillna("")
+    n_inj, n_unsafe = int(flags.str.contains("injection").sum()), int(flags.str.contains("unsafe").sum())
+    if n_inj:
+        st.info(f"🛡️ {n_inj} review(s) contained text that looked like instructions to the AI. "
+                "That part was ignored and the review was analysed as normal feedback.")
+    if n_unsafe:
+        st.warning(f"🛡️ {n_unsafe} review(s) with possibly harmful content were not sent to the AI. "
+                   "They are marked 'needs review' - please read them yourself.")
+
 # ---------------------------------------------------------------- last week (for trend arrows)
 prev_stats, prev_label = None, ""
 if prev_file is not None:
-    prev_df = pd.read_csv(prev_file, dtype=str, keep_default_na=False, encoding="utf-8-sig")
+    try:
+        gr.check_upload(prev_file.name, prev_file.size)
+        prev_df = pd.read_csv(prev_file, dtype=str, keep_default_na=False, encoding="utf-8-sig")
+    except (gr.GuardrailError, ValueError) as exc:
+        st.sidebar.error(f"Last week's file not used: {gr.safe_error(exc) if not isinstance(exc, gr.GuardrailError) else exc}")
+        prev_df = pd.DataFrame()
     if {"sentiment", "category", "urgency", "language", "platform", "date"}.issubset(prev_df.columns):
         prev_stats, prev_label = compute_stats(prev_df), f"uploaded file {prev_file.name}"
     else:
@@ -164,7 +192,7 @@ if "report" not in st.session_state:
             insights = generate_insights(enriched, stats)
             st.session_state.report = render_report(stats, insights, prev_stats)
         except Exception as exc:  # noqa: BLE001
-            st.session_state.report = f"Report could not be generated: {exc}"
+            st.session_state.report = f"Report could not be generated: {gr.safe_error(exc)}"
 
 # ---------------------------------------------------------------- KPIs
 k1, k2, k3, k4, k5 = st.columns(5)

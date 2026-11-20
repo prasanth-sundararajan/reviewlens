@@ -5,6 +5,8 @@ import os
 
 from dotenv import load_dotenv
 
+from .guardrails import llm_max_tokens, llm_timeout
+
 load_dotenv()
 
 DEFAULT_MODELS = {
@@ -54,14 +56,19 @@ def get_llm(provider: str | None = None, temperature: float = 0.0):
         )
 
     model = get_model_name(provider)
+    # Guardrails: cap output tokens and wall-clock time of every request (cost / abuse limits).
+    max_tokens, timeout = llm_max_tokens(), llm_timeout()
     if provider == "openai":
         from langchain_openai import ChatOpenAI
 
-        return ChatOpenAI(model=model, temperature=temperature, max_retries=3, timeout=60)
+        return ChatOpenAI(model=model, temperature=temperature, max_retries=2, timeout=timeout,
+                          max_tokens=max_tokens)
     if provider == "gemini":
         from langchain_google_genai import ChatGoogleGenerativeAI
 
-        return ChatGoogleGenerativeAI(model=model, temperature=temperature, max_retries=3)
+        return ChatGoogleGenerativeAI(model=model, temperature=temperature, max_retries=2, timeout=timeout,
+                                      max_output_tokens=max_tokens)
     from langchain_anthropic import ChatAnthropic
 
-    return ChatAnthropic(model=model, temperature=temperature, max_retries=3, timeout=60)
+    return ChatAnthropic(model=model, temperature=temperature, max_retries=2, timeout=timeout,
+                         max_tokens=max_tokens)

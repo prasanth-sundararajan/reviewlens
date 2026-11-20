@@ -5,7 +5,7 @@ import pandas as pd
 
 EXPORT_COLUMNS = [
     "review_id", "date", "platform", "rating", "sentiment", "category", "urgency",
-    "language", "summary", "suggested_reply", "review_text", "status",
+    "language", "summary", "suggested_reply", "review_text", "status", "guardrails",
 ]
 
 

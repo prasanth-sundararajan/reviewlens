@@ -1,5 +1,5 @@
 [server]
-maxUploadSize = 50
+maxUploadSize = 5   # MB; app guardrail MAX_UPLOAD_MB checks again
 
 [browser]
 gatherUsageStats = false

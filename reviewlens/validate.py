@@ -7,6 +7,8 @@ from typing import IO
 
 import pandas as pd
 
+from . import guardrails as gr
+
 REQUIRED_COLUMNS = ["review_id", "date", "platform", "rating", "review_text"]
 
 
@@ -56,6 +58,14 @@ def validate_reviews(raw: pd.DataFrame) -> ValidationResult:
     df = df[REQUIRED_COLUMNS].copy()
     for col in REQUIRED_COLUMNS:
         df[col] = df[col].astype(str).str.strip().replace({"nan": "", "None": ""})
+    # Guardrail: strip control / invisible characters everywhere, cap the length of each field.
+    for col in ["review_id", "date", "platform", "rating"]:
+        df[col] = df[col].map(lambda v: gr.clean_text(v, 100)[0])
+    cleaned = df["review_text"].map(gr.clean_text)
+    df["review_text"] = cleaned.str[0]
+    truncated = int(cleaned.str[1].sum())
+    if truncated:
+        warnings.append(f"{truncated} very long review(s) were shortened to {gr.max_review_chars()} characters.")
 
     empty = df["review_text"] == ""
     if empty.any():
