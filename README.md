@@ -387,3 +387,7 @@ AI-safety and abuse limits live in [`reviewlens/guardrails.py`](reviewlens/guard
 - Secrets (`OPENAI_API_KEY`, `SMTP_PASSWORD`) live only in `.env` — git-ignored locally, `chmod 600` on the server.
 - The public app spends on your OpenAI key: it allows `MAX_RUNS_PER_DAY` (3) analyses per day and `MAX_REVIEWS` (500) reviews per upload; also set a monthly budget in your OpenAI account.
 - Use a dedicated Gmail account and an App Password for sending; it can be revoked any time.
+
+## License
+
+[MIT](LICENSE) © Prasanth Sundararajan
